@@ -30,18 +30,15 @@
 - 💨 Live reload
 - ✅ Cache busting
 
-
 ### Philosophy
 
 - Minimal code
 - SEO-friendly
 - 🚀 Production-ready
 
-
 ### Requirements
 
 - Node.js 14+ and npm
-
 
 ### Getting started
 
@@ -79,8 +76,6 @@ Open http://localhost:3000
 ├── tailwind.config.js              # Tailwind CSS configuration
 └── tsconfig.json                   # TypeScript configuration
 ```
-
-
 
 ### Customization
 
