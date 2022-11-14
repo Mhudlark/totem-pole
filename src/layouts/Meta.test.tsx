@@ -8,14 +8,13 @@ jest.mock(
   'next/head',
   () =>
     function Head(props: { children: ReactNode }) {
-      // eslint-disable-next-line testing-library/no-node-access
       return <>{props.children}</>;
     }
 );
 
 describe('Meta component', () => {
   describe('Render method', () => {
-    it('should a page title', async () => {
+    it('renders a page title', async () => {
       const title = 'Random title';
 
       render(<Meta title={title} description="Random description" />);

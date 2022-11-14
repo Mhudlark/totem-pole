@@ -5,7 +5,7 @@ import type { AppProps } from 'next/app';
 import type { ReactElement, ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
-import Debug from '@/layouts/Debug';
+import App from '@/layouts/App';
 
 import store from '../store/store';
 
@@ -22,7 +22,7 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
 
   return (
     <Provider store={store}>
-      <Debug>{getLayout(<Component {...pageProps} />)}</Debug>
+      <App>{getLayout(<Component {...pageProps} />)}</App>
     </Provider>
   );
 };
