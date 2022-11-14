@@ -1,37 +1,48 @@
-import { Button } from '@mui/material';
-import { useDispatch } from 'react-redux';
-
-import { closeAlert, openAlert } from '@/store/alerts/actions';
-import { AlertType } from '@/store/alerts/helpers';
+import { Button, Stack, TextField } from '@mui/material';
+import { debounce } from 'lodash';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 const Index = () => {
-  const dispatch = useDispatch();
+  const router = useRouter();
 
-  const alertTypes = Object.values(AlertType);
+  const [username, setUsername] = useState('');
+  const [isUsernameValid, setIsUsernameValid] = useState(false);
 
-  const triggerAlert = (type: AlertType) => {
-    dispatch(openAlert(type, `msg --- ${type} --- msg`));
+  const updateUsername = (newUsername: string) => {
+    console.log(newUsername);
+    setUsername(newUsername);
+
+    // Check if username already exists - backend
+    // If it does, show error
   };
 
-  const dismissAlert = () => {
-    dispatch(closeAlert());
+  const onUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.value);
+
+    const newUsername = event.target.value;
+
+    // check if username is valid
+    // if so, enable the join button
+    setIsUsernameValid(newUsername !== '');
+
+    // Debounce whatever change updates
+    debounce(() => updateUsername(newUsername), 500);
+  };
+
+  const onStart = () => {
+    console.log('start');
+    console.log(username);
+    router.push('/lobby');
   };
 
   return (
-    <>
-      {alertTypes.map((type) => (
-        <Button
-          key={type}
-          onClick={() => triggerAlert(type)}
-          variant="outlined"
-          color={type}
-        >{`Trigger ${type}`}</Button>
-      ))}
-      <Button
-        variant="outlined"
-        onClick={dismissAlert}
-      >{`Dismiss alert`}</Button>
-    </>
+    <Stack sx={{ gap: 4 }}>
+      <TextField onChange={onUsernameChange} />
+      <Button variant="outlined" onClick={onStart} disabled={!isUsernameValid}>
+        Get started
+      </Button>
+    </Stack>
   );
 };
 
