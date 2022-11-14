@@ -56,7 +56,9 @@
         "unused-imports/no-unused-vars": [
           "error",
           { "argsIgnorePattern": "^_" }
-        ]
+        ],
+        "default-param-last": "off",
+        "@typescript-eslint/default-param-last": "off"
       }
     },
     // Configuration for testing
