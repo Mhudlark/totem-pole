@@ -1,19 +1,28 @@
 import { Button, Stack, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
+import type { ApplicationStore } from '@/store/sharedHelpers';
+import { setUsername } from '@/store/user/actions';
 import { useDebounce } from '@/utils/hooks';
 import { validateUsername } from '@/utils/validation';
 
 const Index = () => {
+  // Hooks
   const router = useRouter();
+  const dispatch = useDispatch();
 
-  const [username, setUsername] = useState('');
+  // Redux states
+  const username = useSelector(
+    (state: ApplicationStore) => state.user.username
+  );
+
+  // Local states
   const [isUsernameValid, setIsUsernameValid] = useState(false);
 
   const updateUsername = (newUsername: string) => {
-    console.log(newUsername);
-    setUsername(newUsername);
+    dispatch(setUsername(newUsername));
     setIsUsernameValid(validateUsername(newUsername));
   };
 

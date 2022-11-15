@@ -1,11 +1,14 @@
 import type { Alert } from './alerts/helpers';
 import { alertReducerInitialState } from './alerts/helpers';
+import type { User } from './user/helpers';
+import { userReducerInitialState } from './user/helpers';
 
 /**
  * The schema for the root-level application / redux store, containing the global app state.
  */
 export interface ApplicationStore {
   alert: Alert;
+  user: User;
 }
 
 /**
@@ -14,4 +17,5 @@ export interface ApplicationStore {
  */
 export const initialStore: ApplicationStore = {
   alert: alertReducerInitialState,
+  user: userReducerInitialState,
 };
