@@ -1,19 +1,26 @@
-import { mockRoom } from '__mocks__/room';
+import { getMockRoom } from '@/../__mocks__/room';
+
+import type { Action, AppThunk } from '../action';
+import type { Room } from './helpers';
 
 export const CREATE_ROOM = 'CREATE_ROOM';
+const SET_ROOM = 'CREATE_ROOM';
 
-export type CreateRoom = () => (dispatch: any) => Promise<boolean>;
+type SetRoom = (room: Room) => Action<Room>;
 
-export const createRoom: CreateRoom = () => async (dispatch) => {
-  const room = mockRoom;
+const setRoom: SetRoom = (room: Room) => ({
+  type: SET_ROOM,
+  payload: room,
+});
 
-  dispatch({
-    type: CREATE_ROOM,
-    payload: room,
-  });
+export const createRoom =
+  (): AppThunk<Promise<boolean>> => async (dispatch) => {
+    const room = await getMockRoom();
 
-  return true;
-};
+    dispatch(setRoom(room));
+
+    return true;
+  };
 
 // export type LoginAdminThunk = (
 //   dispatch: any,

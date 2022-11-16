@@ -6,3 +6,5 @@ export const mockRoom: Room = {
   roomName: 'test',
   users: [mockUser],
 };
+
+export const getMockRoom = async () => mockRoom;

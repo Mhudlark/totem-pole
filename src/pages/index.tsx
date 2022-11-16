@@ -1,8 +1,8 @@
 import { Button, Stack, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
 
+import { useAppDispatch } from '@/store/hooks';
 import { createUser } from '@/store/user/actions';
 import { useDebounce } from '@/utils/hooks';
 import { paths } from '@/utils/paths';
@@ -11,7 +11,7 @@ import { validateUsername } from '@/utils/validation';
 const Index = () => {
   // Hooks
   const router = useRouter();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   // Local states
   const [username, setUsername] = useState('');

@@ -1,13 +1,12 @@
 import type { AlertColor } from '@mui/material';
 import { Alert, Snackbar } from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { closeAlert } from '@/store/alerts/actions';
-import type { ApplicationStore } from '@/store/sharedHelpers';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 const SnackBar = () => {
-  const alert = useSelector((state: ApplicationStore) => state.alert);
-  const dispatch = useDispatch();
+  const alert = useAppSelector((state) => state.alert);
+  const dispatch = useAppDispatch();
 
   const closeSnackBar = () => {
     dispatch(closeAlert());
