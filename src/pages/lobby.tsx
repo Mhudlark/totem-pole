@@ -1,8 +1,14 @@
 import { Button, Stack } from '@mui/material';
+import { useRouter } from 'next/router';
+
+import { paths } from '@/utils/paths';
 
 const Lobby = () => {
+  // Hooks
+  const router = useRouter();
+
   const join = () => {
-    console.log('join');
+    router.push(paths.join);
   };
 
   const host = () => {
