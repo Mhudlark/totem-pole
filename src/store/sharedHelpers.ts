@@ -1,5 +1,7 @@
 import type { Alert } from './alerts/helpers';
 import { alertReducerInitialState } from './alerts/helpers';
+import type { Room } from './room/helpers';
+import { roomReducerInitialState } from './room/helpers';
 import type { User } from './user/helpers';
 import { userReducerInitialState } from './user/helpers';
 
@@ -9,6 +11,7 @@ import { userReducerInitialState } from './user/helpers';
 export interface ApplicationStore {
   alert: Alert;
   user: User;
+  room: Room;
 }
 
 /**
@@ -18,4 +21,5 @@ export interface ApplicationStore {
 export const initialStore: ApplicationStore = {
   alert: alertReducerInitialState,
   user: userReducerInitialState,
+  room: roomReducerInitialState,
 };
