@@ -2,6 +2,8 @@ import { Button, Stack, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
+import { useAppDispatch } from '@/store/hooks';
+import { joinRoom } from '@/store/room/actions';
 import { useDebounce } from '@/utils/hooks';
 import { paths } from '@/utils/paths';
 import { validateRoomName } from '@/utils/validation';
@@ -9,6 +11,7 @@ import { validateRoomName } from '@/utils/validation';
 const Index = () => {
   // Hooks
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   // Local states
   const [roomName, setRoomName] = useState('');
@@ -27,15 +30,15 @@ const Index = () => {
     updateRoomNameDebounced(newRoomName);
   };
 
-  const onJoin = () => {
-    console.log('join');
-    console.log(roomName);
-
-    // TODO: Get room info object from backend
-    const room = {};
-
-    console.log('room:', room);
-    router.push(paths.room);
+  const onJoin = async () => {
+    try {
+      const didJoinRoom = await dispatch(joinRoom(roomName));
+      if (didJoinRoom) {
+        router.push(paths.room);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

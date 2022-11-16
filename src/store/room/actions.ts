@@ -3,8 +3,7 @@ import { getMockRoom } from '@/../__mocks__/room';
 import type { Action, AppThunk } from '../action';
 import type { Room } from './helpers';
 
-export const CREATE_ROOM = 'CREATE_ROOM';
-const SET_ROOM = 'CREATE_ROOM';
+export const SET_ROOM = 'SET_ROOM';
 
 type SetRoom = (room: Room) => Action<Room>;
 
@@ -12,6 +11,8 @@ const setRoom: SetRoom = (room: Room) => ({
   type: SET_ROOM,
   payload: room,
 });
+
+// ====================== Thunk Actions =========================
 
 export const createRoom =
   (): AppThunk<Promise<boolean>> => async (dispatch) => {
@@ -22,15 +23,18 @@ export const createRoom =
     return true;
   };
 
-// export type LoginAdminThunk = (
-//   dispatch: any,
-//   credentials: string
-// ) => Promise<void>;
-// export type LoginAdmin = (credentials: string) => LoginAdminThunk;
+export const joinRoom =
+  (roomName: string): AppThunk<Promise<boolean>> =>
+  async (dispatch) => {
+    console.log('Joining room', roomName);
+    const room = await getMockRoom();
 
-// export const loginAdmin: LoginAdmin = (credentials) => async (dispatch) => {
-//   return loginAdminThunk(dispatch, credentials);
-// };
+    console.log(room);
+
+    dispatch(setRoom(room));
+
+    return true;
+  };
 
 // export const loginAdminThunk: LoginAdminThunk = async (
 //   dispatch,
