@@ -37,7 +37,7 @@ const Index = () => {
 
   return (
     <Stack sx={{ gap: 4 }}>
-      <TextField onChange={onUsernameChange} />
+      <TextField onChange={onUsernameChange} placeholder={'test-user'} />
       <Button variant="outlined" onClick={onStart} disabled={!isUsernameValid}>
         Get started
       </Button>
