@@ -1,14 +1,11 @@
-import type { Room } from './helpers';
+import { mockRoom } from '__mocks__/room';
 
 export const CREATE_ROOM = 'CREATE_ROOM';
 
 export type CreateRoom = () => (dispatch: any) => Promise<boolean>;
 
 export const createRoom: CreateRoom = () => async (dispatch) => {
-  const room: Room = {
-    roomName: 'test',
-    users: [{ username: 'test' }],
-  };
+  const room = mockRoom;
 
   dispatch({
     type: CREATE_ROOM,
