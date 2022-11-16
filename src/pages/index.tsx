@@ -1,11 +1,11 @@
 import { Button, Stack, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import type { ApplicationStore } from '@/store/sharedHelpers';
-import { setUsername } from '@/store/user/actions';
+import { createUser } from '@/store/user/actions';
 import { useDebounce } from '@/utils/hooks';
+import { paths } from '@/utils/paths';
 import { validateUsername } from '@/utils/validation';
 
 const Index = () => {
@@ -13,16 +13,12 @@ const Index = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // Redux states
-  const username = useSelector(
-    (state: ApplicationStore) => state.user.username
-  );
-
   // Local states
+  const [username, setUsername] = useState('');
   const [isUsernameValid, setIsUsernameValid] = useState(false);
 
   const updateUsername = (newUsername: string) => {
-    dispatch(setUsername(newUsername));
+    setUsername(newUsername);
     setIsUsernameValid(validateUsername(newUsername));
   };
 
@@ -35,14 +31,8 @@ const Index = () => {
   };
 
   const onStart = () => {
-    console.log('start');
-    console.log(username);
-
-    // TODO: Get user id from backend
-    const userId = '12345';
-
-    console.log('userId:', userId);
-    router.push('/lobby');
+    dispatch(createUser(username));
+    router.push(paths.lobby);
   };
 
   return (
