@@ -1,45 +1,47 @@
-import { RequestMethod } from '@/backend/api/utils';
-import type { RootState } from '@/store/store';
+import { RequestMethod } from '@/backend/api/helpers';
 
 // eslint-disable-next-line no-restricted-globals
 export const baseApiPath = `http://localhost:3000`;
 
 const createUrl = (endpointPath: string) => `${baseApiPath}/api${endpointPath}`;
 
-const createBody = (bodyObj: Object): { body: string } | {} => {
+type CreateBody = (bodyObj: Object) => { body: string } | {};
+
+const createBody: CreateBody = (bodyObj) => {
   return Object.keys(bodyObj).length ? { body: JSON.stringify(bodyObj) } : {};
 };
 
-const createAuthorisation = (
-  isAuthorised: boolean,
-  getState: () => RootState
-): { Authorization: string } | {} => {
-  console.log(getState());
+type CreateAuthorisation = (
+  isAuthorised: boolean
+) => { Authorization: string } | {};
+
+const createAuthorisation: CreateAuthorisation = (isAuthorised) => {
   return isAuthorised
     ? {
-        Authorization: `Bearer getState().userReducer.currentUser.token`,
+        Authorization: `Bearer userReducer.currentUser.token`,
       }
     : {};
 };
 
-const createAbortController = (
-  abortControllerSignal: AbortSignal | null
-): { signal: AbortSignal } | {} => {
-  return abortControllerSignal !== null
-    ? { signal: abortControllerSignal }
-    : {};
+type CreateAbortController = (
+  abortControllerSignal?: AbortSignal
+) => { signal: AbortSignal } | {};
+
+const createAbortController: CreateAbortController = (
+  abortControllerSignal
+) => {
+  return abortControllerSignal ? { signal: abortControllerSignal } : {};
 };
 
 const createFetchOptions = (
   method: RequestMethod,
   bodyObj: Object,
   isAuthorised: boolean,
-  getState: () => RootState,
-  abortControllerSignal: AbortSignal | null
+  abortControllerSignal?: AbortSignal
 ) => ({
   headers: {
     'Content-Type': 'application/json',
-    ...createAuthorisation(isAuthorised, getState),
+    ...createAuthorisation(isAuthorised),
   },
   method,
   ...createBody(bodyObj),
@@ -51,15 +53,13 @@ export const fetchBase = async <T>(
   endpointPath: string,
   bodyObj: Object = {},
   isAuthorised: boolean = false,
-  abortControllerSignal: AbortSignal | null = null,
-  getState: () => RootState
+  abortControllerSignal?: AbortSignal
 ): Promise<T> => {
   const url = createUrl(endpointPath);
   const fetchOptions = createFetchOptions(
     method,
     bodyObj,
     isAuthorised,
-    getState,
     abortControllerSignal
   );
 
