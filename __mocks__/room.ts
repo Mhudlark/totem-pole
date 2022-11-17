@@ -1,4 +1,4 @@
-import type { Room } from '@/store/room/helpers';
+import type { Room } from '@/sharedTypes';
 
 import {
   mockUser1,

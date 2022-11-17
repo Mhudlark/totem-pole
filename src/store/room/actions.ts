@@ -1,7 +1,13 @@
-import { getMockRoom } from '@/../__mocks__/room';
+import type { Room } from '@/sharedTypes';
+import { RequestMethod } from '@/sharedUtils/api/request';
+import {
+  createCreatePayload,
+  createJoinPayload,
+} from '@/sharedUtils/api/request/room';
+import { fetchBase } from '@/utils/api';
 
 import type { Action, AppThunk } from '../action';
-import type { Room } from './helpers';
+import { openErrorAlert } from '../util';
 
 export const SET_ROOM = 'SET_ROOM';
 
@@ -15,51 +21,62 @@ const setRoom: SetRoom = (room: Room) => ({
 // ====================== Thunk Actions =========================
 
 export const createRoom =
-  (): AppThunk<Promise<boolean>> => async (dispatch) => {
-    const room = await getMockRoom();
+  (abortControllerSignal?: AbortSignal): AppThunk<Promise<boolean>> =>
+  async (dispatch, getState) => {
+    try {
+      const createPayload = createCreatePayload(getState().user.username);
 
-    dispatch(setRoom(room));
+      const res = await fetchBase<{ room: Room }>(
+        RequestMethod.POST,
+        `/room`,
+        createPayload,
+        true,
+        abortControllerSignal
+      );
 
-    return true;
+      const { room } = res;
+
+      if (room) {
+        dispatch(setRoom(room));
+        return true;
+      }
+
+      throw new Error('Room could not be created');
+    } catch (error: any) {
+      dispatch(openErrorAlert(error.message, abortControllerSignal));
+      return false;
+    }
   };
 
 export const joinRoom =
-  (roomName: string): AppThunk<Promise<boolean>> =>
-  async (dispatch) => {
-    console.log('Joining room', roomName);
-    const room = await getMockRoom();
+  (
+    roomName: string,
+    abortControllerSignal?: AbortSignal
+  ): AppThunk<Promise<boolean>> =>
+  async (dispatch, getState) => {
+    try {
+      const joinPayload = createJoinPayload(getState().user.username);
 
-    console.log(room);
+      const res = await fetchBase<{ room: Room }>(
+        RequestMethod.PUT,
+        `/room/${roomName}`,
+        joinPayload,
+        true,
+        abortControllerSignal
+      );
 
-    dispatch(setRoom(room));
+      const { room } = res;
 
-    return true;
+      console.log('Room: ', room);
+
+      if (room) {
+        dispatch(setRoom(room));
+        return true;
+      }
+
+      throw new Error('Error joining room');
+    } catch (error: any) {
+      dispatch(openErrorAlert(error.message, abortControllerSignal));
+      return false;
+    }
   };
-
-// export const loginAdminThunk: LoginAdminThunk = async (
-//   dispatch,
-//   credentials
-// ) => {
-//   dispatch(fetchSmartChoice('POST', '/auth/loginAdmin', credentials))
-//     .then((res) => {
-//       if (!res?.token) {
-//         throw { message: 'Access denied' };
-//       }
-
-//       const decodedToken = jwtDecode(res.token);
-//       dispatch({
-//         type: actionTypes.loginSuccess,
-//         payload: {
-//           ...decodedToken,
-//           token: res.token,
-//         },
-//       });
-//       return { ...res, success: true };
-//     })
-//     .catch((error) => {
-//       const message =
-//         responseCodes.loginAdmin?.[error.message] ?? error.message;
-//       dispatch(dispatchErrorAlert(message));
-//       throw new Error(message);
-//     });
-// };

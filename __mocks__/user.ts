@@ -1,4 +1,4 @@
-import type { User } from '@/store/user/helpers';
+import type { User } from '@/sharedTypes';
 
 export const mockUser: User = {
   username: 'mock-user',

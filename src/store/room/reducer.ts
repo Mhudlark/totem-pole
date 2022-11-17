@@ -1,10 +1,11 @@
 import type { Reducer } from 'redux';
 
+import type { Room } from '@/sharedTypes';
+
 import type { Action } from '../action';
 import type { ApplicationStore } from '../sharedHelpers';
 import { initialStore } from '../sharedHelpers';
 import { SET_ROOM } from './actions';
-import type { Room } from './helpers';
 
 const roomReducer: Reducer<ApplicationStore['room'], Action<Room>> = (
   room = initialStore.room,

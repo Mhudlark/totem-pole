@@ -1,4 +1,4 @@
-import type { Room } from '@/store/room/helpers';
+import type { Room } from '@/sharedTypes';
 
 import { mockRoom1, mockRoom2, mockRoom3 } from './room';
 

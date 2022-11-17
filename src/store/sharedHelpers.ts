@@ -1,8 +1,8 @@
+import type { Room, User } from '@/sharedTypes';
+
 import type { Alert } from './alerts/helpers';
 import { alertReducerInitialState } from './alerts/helpers';
-import type { Room } from './room/helpers';
 import { roomReducerInitialState } from './room/helpers';
-import type { User } from './user/helpers';
 import { userReducerInitialState } from './user/helpers';
 
 /**

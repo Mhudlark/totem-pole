@@ -1,10 +1,12 @@
 import { getMockEmptyRoom } from '__mocks__/room';
 
-import type { Room } from '@/store/room/helpers';
-
-import { createUser } from '../../user';
-import type { CreatePayload, RoomPayload } from '../helpers';
-import { RoomPayloadType } from '../helpers';
+import type { Room } from '@/sharedTypes';
+import type {
+  CreatePayload,
+  RoomPayload,
+} from '@/sharedUtils/api/request/room';
+import { RoomPayloadType } from '@/sharedUtils/api/request/room';
+import { initUser } from '@/sharedUtils/user';
 
 export type CreateRoom = (roomPayload: RoomPayload) => Promise<Room>;
 
@@ -18,7 +20,7 @@ export const createRoom: CreateRoom = async (roomPayload) => {
     room = await getMockEmptyRoom();
 
     // Add the user to the room
-    const newUser = createUser(createPayload.username);
+    const newUser = initUser(createPayload.username);
     room.users.push(newUser);
   } else {
     throw new Error(`Invalid room payload type ${roomPayload.type}`);

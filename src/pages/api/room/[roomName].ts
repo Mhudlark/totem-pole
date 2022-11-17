@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { RequestMethod } from '@/backend/api/helpers';
-import type { RoomPayload } from '@/backend/api/room/helpers';
 import { getRoom } from '@/backend/api/room/methods/get';
 import { updateRoom } from '@/backend/api/room/methods/update';
+import { RequestMethod } from '@/sharedUtils/api/request';
+import type { RoomPayload } from '@/sharedUtils/api/request/room';
 
 export type Handler = (req: NextApiRequest, res: NextApiResponse) => void;
 

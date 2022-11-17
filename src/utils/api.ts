@@ -1,9 +1,7 @@
-import { RequestMethod } from '@/backend/api/helpers';
+import { RequestMethod } from '@/sharedUtils/api/request';
 
-// eslint-disable-next-line no-restricted-globals
-export const baseApiPath = `http://localhost:3000`;
-
-const createUrl = (endpointPath: string) => `${baseApiPath}/api${endpointPath}`;
+const createUrl = (endpointPath: string) =>
+  `${process.env.API_BASE_PATH}${endpointPath}`;
 
 type CreateBody = (bodyObj: Object) => { body: string } | {};
 
@@ -70,7 +68,7 @@ export const fetchBase = async <T>(
     throw new Error(`${status}: ${statusText}`);
   }
 
-  const res = await response.json();
+  const res: T = await response.json();
 
   return res;
 };

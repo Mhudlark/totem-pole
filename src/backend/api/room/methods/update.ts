@@ -1,10 +1,13 @@
 import { getMockRoom } from '__mocks__/rooms';
 
-import type { Room } from '@/store/room/helpers';
-
-import { createUser } from '../../user';
-import type { JoinPayload, LeavePayload, RoomPayload } from '../helpers';
-import { RoomPayloadType } from '../helpers';
+import type { Room } from '@/sharedTypes';
+import type {
+  JoinPayload,
+  LeavePayload,
+  RoomPayload,
+} from '@/sharedUtils/api/request/room';
+import { RoomPayloadType } from '@/sharedUtils/api/request/room';
+import { initUser } from '@/sharedUtils/user';
 
 export type UpdateRoom = (
   roomName: string,
@@ -21,7 +24,7 @@ export const updateRoom: UpdateRoom = async (roomName, roomPayload) => {
     room = await getMockRoom(roomName);
 
     // Add the user to the room
-    const newUser = createUser(joinPayload.username);
+    const newUser = initUser(joinPayload.username);
     room.users.push(newUser);
   } else if (roomPayload.type === RoomPayloadType.LEAVE) {
     const leavePayload = roomPayload as LeavePayload;
@@ -30,7 +33,7 @@ export const updateRoom: UpdateRoom = async (roomName, roomPayload) => {
     room = await getMockRoom(roomName);
 
     // Add the user to the room
-    const newUser = createUser(leavePayload.username);
+    const newUser = initUser(leavePayload.username);
     room.users.push(newUser);
   } else {
     throw new Error(`Invalid room payload type ${roomPayload.type}`);
