@@ -9,11 +9,12 @@ export type Handler = (req: NextApiRequest, res: NextApiResponse) => void;
 const handler: Handler = async (req, res) => {
   try {
     const method = req.method as RequestMethod;
+    const bodyObj = JSON.parse(req.body as string) as Object;
 
     // =============== POST ===============
     if (method === RequestMethod.POST) {
-      const roomPayload = req.body as RoomPayload;
-      const room = createRoom(roomPayload);
+      const roomPayload = bodyObj as RoomPayload;
+      const room = await createRoom(roomPayload);
 
       res.status(201).json({ room });
     }

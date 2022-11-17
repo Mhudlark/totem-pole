@@ -20,7 +20,8 @@ const handler: Handler = async (req, res) => {
     }
     // =============== PUT ===============
     else if (method === RequestMethod.PUT) {
-      const roomPayload = req.body as RoomPayload;
+      const bodyObj = JSON.parse(req.body as string) as Object;
+      const roomPayload = bodyObj as RoomPayload;
       const room = updateRoom(roomName, roomPayload);
 
       res.status(200).json({ room });
