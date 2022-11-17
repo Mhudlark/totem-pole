@@ -1,5 +1,4 @@
-import { getMockEmptyRoom } from '__mocks__/room';
-
+import { getMockEmptyRoom } from '@/../__mocks__/room';
 import type { Room } from '@/sharedTypes';
 import type {
   CreatePayload,

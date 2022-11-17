@@ -1,5 +1,4 @@
-import { getMockRoom } from '__mocks__/rooms';
-
+import { getMockRoom } from '@/../__mocks__/rooms';
 import type { Room } from '@/sharedTypes';
 
 export type GetRoom = (roomName: string) => Promise<Room>;

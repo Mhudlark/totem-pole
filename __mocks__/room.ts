@@ -34,6 +34,6 @@ export const mockRoom3: Room = {
   users: [mockUser6],
 };
 
-export const getMockRoom = async () => mockRoom;
+export const getMockRoom = async () => ({ ...mockRoom });
 
-export const getMockEmptyRoom = async () => mockEmptyRoom;
+export const getMockEmptyRoom = async () => ({ ...mockEmptyRoom });
