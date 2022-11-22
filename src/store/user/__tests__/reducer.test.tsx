@@ -10,6 +10,9 @@ describe('User reducer', () => {
         type: SET_USERNAME,
         payload: username,
       })
-    ).toEqual({ ...userReducerInitialState, username });
+    ).toEqual({
+      ...userReducerInitialState,
+      userMetadata: { ...userReducerInitialState.userMetadata, username },
+    });
   });
 });

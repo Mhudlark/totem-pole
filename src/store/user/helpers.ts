@@ -1,3 +1,8 @@
-export const userReducerInitialState = {
-  username: '',
+import type { User } from '@/sharedTypes';
+
+export const userReducerInitialState: User = {
+  userMetadata: {
+    key: '',
+    username: '',
+  },
 };

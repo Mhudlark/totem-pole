@@ -12,7 +12,9 @@ const Index = () => {
       <Stack sx={{ gap: 1 }}>
         {Array.isArray(room?.users) &&
           room.users.map((user) => (
-            <Box key={user.username}>{user.username}</Box>
+            <Box key={user.userMetadata.username}>
+              {user.userMetadata.username}
+            </Box>
           ))}
       </Stack>
     </Stack>

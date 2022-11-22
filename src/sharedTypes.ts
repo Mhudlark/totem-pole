@@ -1,7 +1,10 @@
 export type AnyFunction = (...args: any[]) => void;
 
 export interface User {
-  username: string;
+  userMetadata: {
+    key: string;
+    username: string;
+  };
 }
 
 export interface Room {
