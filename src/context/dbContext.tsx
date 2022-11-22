@@ -10,7 +10,11 @@ import { initUser } from '@/sharedUtils/user';
 import { openAlert } from '@/store/alerts/actions';
 import { AlertType } from '@/store/alerts/helpers';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { addUsersToRoom, removeUsersFromRoom } from '@/store/room/actions';
+import {
+  addUsersToRoom,
+  removeUsersFromRoom,
+  setRoomName,
+} from '@/store/room/actions';
 
 import { dbConfig } from './db/config';
 import type { CustomPresence } from './db/helpers';
@@ -23,11 +27,13 @@ import {
 export type DbContextType = {
   createRoom: () => Promise<void>;
   joinRoom: (roomName: string) => Promise<void>;
+  leaveRoom: () => Promise<void>;
 };
 
 const DbContextInitialValue: DbContextType = {
   createRoom: () => Promise.resolve(),
   joinRoom: (_roomName: string) => Promise.resolve(),
+  leaveRoom: () => Promise.resolve(),
 };
 
 export const DbContext = createContext<DbContextType>(DbContextInitialValue);
@@ -37,13 +43,9 @@ export type DbProviderProps = { children: ReactNode };
 const DbProvider = ({ children }: DbProviderProps) => {
   const dispatch = useAppDispatch();
 
-  const user = useAppSelector((state) => state.user);
+  const { user, room } = useAppSelector((state) => state);
 
   const [channels, setChannels] = useState<Record<string, RealtimeChannel>>({});
-
-  const pushChannel = (channelName: string, channel: RealtimeChannel) => {
-    setChannels((prev) => ({ ...prev, [channelName]: channel }));
-  };
 
   const supabase = useMemo(
     () =>
@@ -60,6 +62,10 @@ const DbProvider = ({ children }: DbProviderProps) => {
       ),
     []
   );
+
+  const pushChannel = (channelName: string, channel: RealtimeChannel) => {
+    setChannels((prev) => ({ ...prev, [channelName]: channel }));
+  };
 
   /**
    * Called whenever a user (including this user) joins the current room.
@@ -133,23 +139,42 @@ const DbProvider = ({ children }: DbProviderProps) => {
     console.log('createRoom');
 
     const roomName = 'abc123';
+
+    dispatch(setRoomName(roomName));
     await addPresenceChannel(roomName);
   };
 
   const joinRoom = async (roomName: string) => {
     console.log('joinRoom', roomName);
 
+    dispatch(setRoomName(roomName));
     await addPresenceChannel(roomName);
+  };
+
+  const leaveRoom = async () => {
+    const { roomName } = room;
+    console.log('leaveRoom', roomName);
+
+    dispatch(setRoomName(''));
+
+    const allUsers = room.users.map(
+      (roomUser) => roomUser.userMetadata.username
+    );
+
+    dispatch(removeUsersFromRoom(allUsers));
+
+    Object.values(channels).forEach((channel) => channel.unsubscribe());
+    setChannels({});
   };
 
   useEffect(() => {
     return () => {
-      Object.values(channels).forEach((channel) => channel.unsubscribe());
+      leaveRoom();
     };
   }, []);
 
   return (
-    <DbContext.Provider value={{ createRoom, joinRoom }}>
+    <DbContext.Provider value={{ createRoom, joinRoom, leaveRoom }}>
       {children}
     </DbContext.Provider>
   );
