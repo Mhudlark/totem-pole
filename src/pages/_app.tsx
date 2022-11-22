@@ -5,6 +5,7 @@ import type { AppProps } from 'next/app';
 import type { ReactElement, ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
+import DbProvider from '@/context/dbContext';
 import App from '@/layouts/App';
 
 import store from '../store/store';
@@ -22,7 +23,9 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
 
   return (
     <Provider store={store}>
-      <App>{getLayout(<Component {...pageProps} />)}</App>
+      <DbProvider>
+        <App>{getLayout(<Component {...pageProps} />)}</App>
+      </DbProvider>
     </Provider>
   );
 };

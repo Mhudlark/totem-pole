@@ -1,14 +1,13 @@
 import { Button, Stack } from '@mui/material';
 import { useRouter } from 'next/router';
 
-import { useAppDispatch } from '@/store/hooks';
-import { createRoom } from '@/store/room/actions';
+import { useDbContext } from '@/context/dbContext';
 import { paths } from '@/utils/paths';
 
 const Lobby = () => {
   // Hooks
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const { createRoom } = useDbContext();
 
   const join = () => {
     router.push(paths.join);
@@ -16,10 +15,8 @@ const Lobby = () => {
 
   const host = async () => {
     try {
-      const wasRoomCreated = await dispatch(createRoom());
-      if (wasRoomCreated) {
-        router.push(paths.room);
-      }
+      await createRoom();
+      router.push(paths.room);
     } catch (error) {
       console.error(error);
     }
