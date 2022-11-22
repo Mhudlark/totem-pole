@@ -36,6 +36,8 @@ describe('getRoom', () => {
     expect(room.roomName).toEqual(mockRoom.roomName);
     expect(room.users.length).toEqual(mockRoom.users.length);
 
-    expect(room.users[0]?.username).toEqual(mockRoom.users[0]?.username);
+    expect(room.users[0]?.userMetadata.username).toEqual(
+      mockRoom.users[0]?.userMetadata.username
+    );
   });
 });

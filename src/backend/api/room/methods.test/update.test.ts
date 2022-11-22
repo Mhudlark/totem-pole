@@ -25,12 +25,16 @@ describe('updateRoom', () => {
 
     // Check that it is the same room
     expect(room.roomName).toEqual(mockRoomRoomName);
-    expect(room.users[0]?.username).toEqual(mockRoomUsers[0]?.username);
+    expect(room.users[0]?.userMetadata?.username).toEqual(
+      mockRoomUsers[0]?.userMetadata?.username
+    );
 
     // Check that a user has been added to the room
     expect(room.users.length).toEqual(mockRoomUsers.length + 1);
 
     // Check that the new user is in the room
-    expect(room.users[room.users.length - 1]?.username).toEqual(mockUsername);
+    expect(room.users[room.users.length - 1]?.userMetadata?.username).toEqual(
+      mockUsername
+    );
   });
 });

@@ -29,7 +29,7 @@ describe('/api/room/index.ts', () => {
         expect(room.users).toBeTruthy();
         expect(Array.isArray(room.users)).toBeTruthy();
         expect(room.users.length).toBe(1);
-        expect(room.users[0]?.username).toEqual(mockUsername);
+        expect(room.users[0]?.userMetadata.username).toEqual(mockUsername);
       },
     });
   });
