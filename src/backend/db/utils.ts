@@ -4,7 +4,7 @@ import type {
   RealtimeChannelType,
 } from './helpers';
 
-export const initChannelBody = (
+export const initBroadcastChannelSendBody = (
   type: RealtimeChannelType,
   event: BroadcastChannelEvent,
   payload: any

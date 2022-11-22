@@ -33,6 +33,12 @@ export interface CustomPresence extends Presence {
   };
 }
 
+export enum PresenceTrackStatus {
+  ok = 'ok',
+  timedOut = 'timed out',
+  rateLimited = 'rate limited',
+}
+
 // Broadcast channel
 
 export enum BroadcastChannelEvent {

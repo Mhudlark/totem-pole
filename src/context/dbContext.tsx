@@ -17,13 +17,14 @@ import {
   setRoomName,
 } from '@/store/room/actions';
 
-import { dbConfig } from './db/config';
-import type { CustomPresence } from './db/helpers';
+import { dbConfig } from '../backend/db/config';
+import type { CustomPresence } from '../backend/db/helpers';
 import {
   ChannelStatus,
   PresenceChannelEvent,
+  PresenceTrackStatus,
   RealtimeChannelTypes,
-} from './db/helpers';
+} from '../backend/db/helpers';
 
 export type DbContextType = {
   createRoom: () => Promise<void>;
@@ -122,9 +123,7 @@ const DbProvider = ({ children }: DbProviderProps) => {
         if (status === ChannelStatus.subscribed) {
           const onlineStatus = await channel.track(user);
 
-          // TODO: Create type for RealtimeChannelSendResponse
-          // const a = 1 as RealtimeChannelSendResponse;
-          if (onlineStatus !== 'ok') {
+          if (onlineStatus !== PresenceTrackStatus.ok) {
             dispatch(
               openAlert(
                 AlertType.ERROR,
