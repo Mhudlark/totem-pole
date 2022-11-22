@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
+import { generateRoomName } from '@/backend/room/util';
 import { initUser } from '@/sharedUtils/user';
 import { openAlert } from '@/store/alerts/actions';
 import { AlertType } from '@/store/alerts/helpers';
@@ -138,7 +139,7 @@ const DbProvider = ({ children }: DbProviderProps) => {
   const createRoom = async () => {
     console.log('createRoom');
 
-    const roomName = 'abc123';
+    const roomName = generateRoomName();
 
     dispatch(setRoomName(roomName));
     await addPresenceChannel(roomName);
