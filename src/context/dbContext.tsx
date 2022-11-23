@@ -103,36 +103,35 @@ const DbProvider = ({ children }: DbProviderProps) => {
     const channel = supabase.channel(channelName);
     pushChannel(channelName, channel);
 
-    channel
-      .on(
-        RealtimeChannelTypes.presence,
-        { event: PresenceChannelEvent.join },
-        ({ newPresences }) => onJoin(newPresences as CustomPresence[])
-      )
-      .on(
-        RealtimeChannelTypes.presence,
-        { event: PresenceChannelEvent.sync },
-        () => onSync(channelName, channel.presenceState())
-      )
-      .on(
-        RealtimeChannelTypes.presence,
-        { event: PresenceChannelEvent.leave },
-        ({ leftPresences }) => onLeave(leftPresences as CustomPresence[])
-      )
-      .subscribe(async (status) => {
-        if (status === ChannelStatus.subscribed) {
-          const onlineStatus = await channel.track(user);
+    channel.on(
+      RealtimeChannelTypes.presence,
+      { event: PresenceChannelEvent.join },
+      ({ newPresences }) => onJoin(newPresences as CustomPresence[])
+    );
+    channel.on(
+      RealtimeChannelTypes.presence,
+      { event: PresenceChannelEvent.sync },
+      () => onSync(channelName, channel.presenceState())
+    );
+    channel.on(
+      RealtimeChannelTypes.presence,
+      { event: PresenceChannelEvent.leave },
+      ({ leftPresences }) => onLeave(leftPresences as CustomPresence[])
+    );
+    channel.subscribe(async (status) => {
+      if (status === ChannelStatus.subscribed) {
+        const onlineStatus = await channel.track(user);
 
-          if (onlineStatus !== PresenceTrackStatus.ok) {
-            dispatch(
-              openAlert(
-                AlertType.ERROR,
-                'Failed to track user with supabase realtime'
-              )
-            );
-          }
+        if (onlineStatus !== PresenceTrackStatus.ok) {
+          dispatch(
+            openAlert(
+              AlertType.ERROR,
+              'Failed to track user with supabase realtime'
+            )
+          );
         }
-      });
+      }
+    });
   };
 
   const createRoom = async () => {

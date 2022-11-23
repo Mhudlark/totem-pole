@@ -12,6 +12,7 @@
     "lint": "next lint",
     "check-types": "tsc --noEmit --pretty && tsc --project cypress --noEmit --pretty",
     "test": "jest",
+    "eval": "yarn lint && yarn check-types && yarn test",
     "commit": "cz",
     "cypress": "cypress open",
     "cypress:headless": "cypress run",
