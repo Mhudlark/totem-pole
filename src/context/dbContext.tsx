@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   addUsersToRoom,
   removeUsersFromRoom,
+  resetRoom,
   setRoomName,
 } from '@/store/room/actions';
 
@@ -45,7 +46,7 @@ export type DbProviderProps = { children: ReactNode };
 const DbProvider = ({ children }: DbProviderProps) => {
   const dispatch = useAppDispatch();
 
-  const { user, room } = useAppSelector((state) => state);
+  const user = useAppSelector((state) => state.user);
 
   const [channels, setChannels] = useState<Record<string, RealtimeChannel>>({});
 
@@ -134,9 +135,12 @@ const DbProvider = ({ children }: DbProviderProps) => {
     });
   };
 
-  const createRoom = async () => {
-    console.log('createRoom');
+  const unsubscribeAllChannels = () => {
+    Object.values(channels).forEach((channel) => channel.unsubscribe());
+    setChannels({});
+  };
 
+  const createRoom = async () => {
     const roomName = generateRoomName();
 
     dispatch(setRoomName(roomName));
@@ -144,26 +148,13 @@ const DbProvider = ({ children }: DbProviderProps) => {
   };
 
   const joinRoom = async (roomName: string) => {
-    console.log('joinRoom', roomName);
-
     dispatch(setRoomName(roomName));
     await addPresenceChannel(roomName);
   };
 
   const leaveRoom = async () => {
-    const { roomName } = room;
-    console.log('leaveRoom', roomName);
-
-    dispatch(setRoomName(''));
-
-    const allUsers = room.users.map(
-      (roomUser) => roomUser.userMetadata.username
-    );
-
-    dispatch(removeUsersFromRoom(allUsers));
-
-    Object.values(channels).forEach((channel) => channel.unsubscribe());
-    setChannels({});
+    dispatch(resetRoom());
+    unsubscribeAllChannels();
   };
 
   useEffect(() => {

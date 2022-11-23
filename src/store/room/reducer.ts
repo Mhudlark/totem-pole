@@ -10,14 +10,19 @@ import {
   ADD_USERS_TO_ROOM,
   REMOVE_USER_FROM_ROOM,
   REMOVE_USERS_FROM_ROOM,
+  RESET_ROOM,
   SET_ROOM,
   SET_ROOM_NAME,
 } from './actions';
 
 const roomReducer: Reducer<
   ApplicationStore['room'],
-  Action<Room | User | User[] | string | string[]>
+  Action<Room | User | User[] | string | string[] | null>
 > = (room = initialStore.room, action) => {
+  if (action.type === RESET_ROOM) {
+    return initialStore.room;
+  }
+
   if (action.type === SET_ROOM) {
     return action.payload as Room;
   }

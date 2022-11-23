@@ -2,6 +2,7 @@ import type { Room, User } from '@/sharedTypes';
 
 import type { Action } from '../action';
 
+export const RESET_ROOM = 'RESET_ROOM';
 export const SET_ROOM = 'SET_ROOM';
 
 export const SET_ROOM_NAME = 'SET_ROOM_NAME';
@@ -10,6 +11,13 @@ export const ADD_USER_TO_ROOM = 'ADD_USER_TO_ROOM';
 export const ADD_USERS_TO_ROOM = 'ADD_USERS_TO_ROOM';
 export const REMOVE_USER_FROM_ROOM = 'REMOVE_USER_FROM_ROOM';
 export const REMOVE_USERS_FROM_ROOM = 'REMOVE_USERS_FROM_ROOM';
+
+type ResetRoom = () => Action<null>;
+
+export const resetRoom: ResetRoom = () => ({
+  type: RESET_ROOM,
+  payload: null,
+});
 
 type SetRoom = (room: Room) => Action<Room>;
 

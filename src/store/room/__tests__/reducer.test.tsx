@@ -8,6 +8,7 @@ import {
   ADD_USERS_TO_ROOM,
   REMOVE_USER_FROM_ROOM,
   REMOVE_USERS_FROM_ROOM,
+  RESET_ROOM,
   SET_ROOM,
   SET_ROOM_NAME,
 } from '../actions';
@@ -15,6 +16,15 @@ import { roomReducerInitialState } from '../helpers';
 import roomReducer from '../reducer';
 
 describe('Room reducer', () => {
+  it('reset room', () => {
+    expect(
+      roomReducer(mockRoom, {
+        type: RESET_ROOM,
+        payload: null,
+      })
+    ).toEqual(roomReducerInitialState);
+  });
+
   it('set room', () => {
     expect(
       roomReducer(roomReducerInitialState, {
