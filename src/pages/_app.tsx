@@ -1,8 +1,11 @@
 import '../styles/global.css';
 
+import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import type { NextPage } from 'next';
 import type { AppProps } from 'next/app';
 import type { ReactElement, ReactNode } from 'react';
+import { useState } from 'react';
 import { Provider } from 'react-redux';
 
 import DbProvider from '@/context/dbContext';
@@ -21,12 +24,16 @@ type AppPropsWithLayout = AppProps & {
 const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   const getLayout = Component.getLayout || ((page) => page);
 
+  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
+
   return (
-    <Provider store={store}>
-      <DbProvider>
-        <App>{getLayout(<Component {...pageProps} />)}</App>
-      </DbProvider>
-    </Provider>
+    <SessionContextProvider supabaseClient={supabaseClient}>
+      <Provider store={store}>
+        <DbProvider>
+          <App>{getLayout(<Component {...pageProps} />)}</App>
+        </DbProvider>
+      </Provider>
+    </SessionContextProvider>
   );
 };
 

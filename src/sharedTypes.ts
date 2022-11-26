@@ -1,13 +1,19 @@
 export type AnyFunction = (...args: any[]) => void;
 
 export interface User {
-  userMetadata: {
-    key: string;
-    username: string;
-  };
+  userId: string;
+  username: string;
 }
 
 export interface Room {
+  roomId: string;
   roomName: string;
   users: User[];
+  chatMessages: ChatMessage[];
+}
+
+export interface ChatMessage {
+  messageId: string;
+  message: string;
+  author: User;
 }

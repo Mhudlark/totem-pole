@@ -1,52 +1,38 @@
 import type { User } from '@/sharedTypes';
 
 export const mockUser: User = {
-  userMetadata: {
-    key: '1',
-    username: 'mock-user',
-  },
+  userId: '0123',
+  username: 'mock-user',
 };
 
 export const mockUser1: User = {
-  userMetadata: {
-    key: '1',
-    username: 'mock-user-1',
-  },
+  userId: '1234',
+  username: 'mock-user-1',
 };
 
 export const mockUser2: User = {
-  userMetadata: {
-    key: '1',
-    username: 'mock-user-2',
-  },
+  userId: '2345',
+  username: 'mock-user-2',
 };
 
 export const mockUser3: User = {
-  userMetadata: {
-    key: '1',
-    username: 'mock-user-3',
-  },
+  userId: '3456',
+  username: 'mock-user-3',
 };
 
 export const mockUser4: User = {
-  userMetadata: {
-    key: '1',
-    username: 'mock-user-3',
-  },
+  userId: '4567',
+  username: 'mock-user-3',
 };
 
 export const mockUser5: User = {
-  userMetadata: {
-    key: '1',
-    username: 'mock-user-3',
-  },
+  userId: '5678',
+  username: 'mock-user-3',
 };
 
 export const mockUser6: User = {
-  userMetadata: {
-    key: '1',
-    username: 'mock-user-3',
-  },
+  userId: '6789',
+  username: 'mock-user-3',
 };
 
 export const getMockUser = async () => mockUser;

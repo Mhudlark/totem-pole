@@ -12,7 +12,7 @@ describe('User reducer', () => {
       })
     ).toEqual({
       ...userReducerInitialState,
-      userMetadata: { ...userReducerInitialState.userMetadata, username },
+      username,
     });
   });
 });

@@ -46,7 +46,7 @@ describe('Room reducer', () => {
 
   it('add user to room', () => {
     const mockRoomNumUsers = mockRoom.users.length;
-    const newUser = initUser('new-user');
+    const newUser = initUser('abc000', 'new-user');
 
     const newReducer = roomReducer(mockRoom, {
       type: ADD_USER_TO_ROOM,
@@ -57,14 +57,17 @@ describe('Room reducer', () => {
     expect(newReducer.users.length).toEqual(mockRoomNumUsers + 1);
 
     // Check that the new user is in the room
-    expect(
-      newReducer.users[newReducer.users.length - 1]?.userMetadata.username
-    ).toEqual(newUser.userMetadata.username);
+    expect(newReducer.users[newReducer.users.length - 1]?.username).toEqual(
+      newUser.username
+    );
   });
 
   it('add users to room', () => {
     const mockRoomNumUsers = mockRoom.users.length;
-    const newUsers = [initUser('new-user-1'), initUser('new-user-2')];
+    const newUsers = [
+      initUser('abc001', 'new-user-1'),
+      initUser('abc002', 'new-user-2'),
+    ];
 
     const newReducer = roomReducer(mockRoom, {
       type: ADD_USERS_TO_ROOM,
@@ -77,7 +80,7 @@ describe('Room reducer', () => {
     // Check that the new users are in the room
     newUsers.forEach((newUser) => {
       const filteredReducerUsers = newReducer.users.filter((user) => {
-        return user.userMetadata.username === newUser.userMetadata.username;
+        return user.username === newUser.username;
       });
       expect(filteredReducerUsers.length).toEqual(1);
     });
@@ -85,7 +88,7 @@ describe('Room reducer', () => {
 
   it('remove user from room', () => {
     const mockRoomNumUsers = mockRoom.users.length;
-    const userToBeRemoved = mockRoom.users[0]?.userMetadata?.username ?? '';
+    const userToBeRemoved = mockRoom.users[0]?.username ?? '';
 
     const newReducer = roomReducer(mockRoom, {
       type: REMOVE_USER_FROM_ROOM,
@@ -97,9 +100,8 @@ describe('Room reducer', () => {
 
     // Check that the removed user is not in the room
     expect(
-      newReducer.users.filter(
-        (users) => users.userMetadata.username === userToBeRemoved
-      ).length
+      newReducer.users.filter((users) => users.username === userToBeRemoved)
+        .length
     ).toEqual(0);
   });
 
@@ -108,7 +110,7 @@ describe('Room reducer', () => {
     const numUsersToBeRemoved = Math.min(2, mockRoomNumUsers);
     const usersToBeRemoved = mockRoom.users
       .slice(0, numUsersToBeRemoved)
-      .map((user) => user.userMetadata.username);
+      .map((user) => user.username);
 
     const newReducer = roomReducer(mockRoom, {
       type: REMOVE_USERS_FROM_ROOM,
@@ -123,7 +125,7 @@ describe('Room reducer', () => {
     // Check that the removed user is not in the room
     usersToBeRemoved.forEach((userToBeRemoved) => {
       const filteredReducerUsers = newReducer.users.filter((user) => {
-        return user.userMetadata.username === userToBeRemoved;
+        return user.username === userToBeRemoved;
       });
       expect(filteredReducerUsers.length).toEqual(0);
     });

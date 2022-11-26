@@ -41,16 +41,14 @@ const roomReducer: Reducer<
 
   if (action.type === REMOVE_USER_FROM_ROOM) {
     const removedUser = action.payload as string;
-    const newUsers = room.users.filter(
-      (user) => user.userMetadata.username !== removedUser
-    );
+    const newUsers = room.users.filter((user) => user.username !== removedUser);
     return { ...room, users: newUsers };
   }
 
   if (action.type === REMOVE_USERS_FROM_ROOM) {
     const removedUsers = action.payload as string[];
     const newUsers = room.users.filter(
-      (user) => !removedUsers.includes(user.userMetadata.username)
+      (user) => !removedUsers.includes(user.username)
     );
     return { ...room, users: newUsers };
   }

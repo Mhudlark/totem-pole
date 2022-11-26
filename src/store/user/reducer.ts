@@ -12,7 +12,7 @@ const userReducer: Reducer<ApplicationStore['user'], Action<any>> = (
   if (action.type === SET_USERNAME) {
     return {
       ...user,
-      userMetadata: { ...user.userMetadata, username: action.payload },
+      username: action.payload as string,
     };
   }
 

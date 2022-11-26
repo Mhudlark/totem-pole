@@ -1,42 +1,36 @@
-import type {
-  RealtimeChannel,
-  RealtimePresenceState,
-} from '@supabase/supabase-js';
-import { createClient } from '@supabase/supabase-js';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import type { ReactNode } from 'react';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
-import { generateRoomName } from '@/backend/room/util';
+import { useMessagesListener } from '@/backend/db/database/hooks/useMessagesListener';
+import { useRoomListener } from '@/backend/db/database/hooks/useRoomListener';
+import { addMessage, addRoom, addUser } from '@/backend/db/database/set';
+import { addUserToRoom } from '@/backend/db/database/update';
+import type { ChatMessage } from '@/sharedTypes';
 import { initUser } from '@/sharedUtils/user';
-import { openAlert } from '@/store/alerts/actions';
-import { AlertType } from '@/store/alerts/helpers';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   addUsersToRoom,
   removeUsersFromRoom,
   resetRoom,
-  setRoomName,
 } from '@/store/room/actions';
 
-import { dbConfig } from '../backend/db/config';
-import type { CustomPresence } from '../backend/db/helpers';
-import {
-  ChannelStatus,
-  PresenceChannelEvent,
-  PresenceTrackStatus,
-  RealtimeChannelTypes,
-} from '../backend/db/helpers';
-
 export type DbContextType = {
+  login: (username: string) => Promise<void>;
   createRoom: () => Promise<void>;
   joinRoom: (roomName: string) => Promise<void>;
   leaveRoom: () => Promise<void>;
+  sendChatMessage: (message: string) => Promise<void>;
+  chatMessages: ChatMessage[];
 };
 
 const DbContextInitialValue: DbContextType = {
+  login: (_username) => Promise.resolve(),
   createRoom: () => Promise.resolve(),
-  joinRoom: (_roomName: string) => Promise.resolve(),
+  joinRoom: (_roomName) => Promise.resolve(),
   leaveRoom: () => Promise.resolve(),
+  sendChatMessage: (_message) => Promise.resolve(),
+  chatMessages: [],
 };
 
 export const DbContext = createContext<DbContextType>(DbContextInitialValue);
@@ -46,115 +40,97 @@ export type DbProviderProps = { children: ReactNode };
 const DbProvider = ({ children }: DbProviderProps) => {
   const dispatch = useAppDispatch();
 
-  const user = useAppSelector((state) => state.user);
+  const supabase = useSupabaseClient();
 
-  const [channels, setChannels] = useState<Record<string, RealtimeChannel>>({});
+  const { user, room } = useAppSelector((state) => state);
 
-  const supabase = useMemo(
-    () =>
-      createClient(
-        process.env.NEXT_PUBLIC_DB_URL as string,
-        process.env.NEXT_PUBLIC_DB_API_KEY as string,
-        {
-          realtime: {
-            params: {
-              eventsPerSecond: dbConfig.defaultEventsPerSecond,
-            },
-          },
-        }
-      ),
-    []
-  );
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
-  const pushChannel = (channelName: string, channel: RealtimeChannel) => {
-    setChannels((prev) => ({ ...prev, [channelName]: channel }));
-  };
-
-  /**
-   * Called whenever a user (including this user) joins the current room.
-   * @param payload
-   */
-  const onJoin = (payload: CustomPresence[]) => {
-    const newUsers = payload.map((presence) => {
-      return initUser(presence.userMetadata.username);
+  const onJoin = (payload: any[]) => {
+    const newUsers = payload.map((clientPayload) => {
+      return initUser(clientPayload.user.userId, clientPayload.user.username);
     });
 
     dispatch(addUsersToRoom(newUsers));
   };
 
-  const onSync = (roomName: string, payload: RealtimePresenceState) => {
-    console.log('on sync');
-    console.log('roomName:', roomName);
-    console.log(payload);
-  };
-
-  /**
-   * Called whenever a user leaves the current room
-   * @param payload
-   */
-  const onLeave = (payload: CustomPresence[]) => {
+  const onLeave = (payload: any[]) => {
     const leftUsersUsernames = payload.map(
-      (presence) => presence.userMetadata.username
+      (presence) => presence.user.username
     );
 
     dispatch(removeUsersFromRoom(leftUsersUsernames));
   };
 
-  const addPresenceChannel = async (channelName: string) => {
-    const channel = supabase.channel(channelName);
-    pushChannel(channelName, channel);
-
-    channel.on(
-      RealtimeChannelTypes.presence,
-      { event: PresenceChannelEvent.join },
-      ({ newPresences }) => onJoin(newPresences as CustomPresence[])
-    );
-    channel.on(
-      RealtimeChannelTypes.presence,
-      { event: PresenceChannelEvent.sync },
-      () => onSync(channelName, channel.presenceState())
-    );
-    channel.on(
-      RealtimeChannelTypes.presence,
-      { event: PresenceChannelEvent.leave },
-      ({ leftPresences }) => onLeave(leftPresences as CustomPresence[])
-    );
-    channel.subscribe(async (status) => {
-      if (status === ChannelStatus.subscribed) {
-        const onlineStatus = await channel.track(user);
-
-        if (onlineStatus !== PresenceTrackStatus.ok) {
-          dispatch(
-            openAlert(
-              AlertType.ERROR,
-              'Failed to track user with supabase realtime'
-            )
-          );
-        }
-      }
-    });
+  const unsubscribeAllChannels = () => {
+    supabase.removeAllChannels();
   };
 
-  const unsubscribeAllChannels = () => {
-    Object.values(channels).forEach((channel) => channel.unsubscribe());
-    setChannels({});
+  const login = async (username: string) => {
+    console.log('login');
+
+    const out = await addUser(supabase, username);
+
+    console.log('out', out);
+
+    // dispatch(setRoomName(roomName));
   };
 
   const createRoom = async () => {
-    const roomName = generateRoomName();
+    console.log('createRoom');
 
-    dispatch(setRoomName(roomName));
-    await addPresenceChannel(roomName);
+    const out = await addRoom(supabase);
+
+    console.log('out', out);
+
+    // dispatch(setRoomName(roomName));
   };
 
   const joinRoom = async (roomName: string) => {
-    dispatch(setRoomName(roomName));
-    await addPresenceChannel(roomName);
+    console.log('joinRoom');
+
+    const out = await addUserToRoom(supabase, '', roomName);
+
+    console.log('out', out);
+
+    // dispatch(setRoomName(roomName));
   };
 
   const leaveRoom = async () => {
     dispatch(resetRoom());
     unsubscribeAllChannels();
+  };
+
+  const sendChatMessage = async (message: string) => {
+    console.log('sendChatMessage');
+
+    const out = await addMessage(
+      supabase,
+      message,
+      room.roomName,
+      user.username
+    );
+
+    console.log('out', out);
+  };
+
+  const handleRoomUsersUpdate = (payload: any) => {
+    console.log('handleRoomUsersUpdate');
+    console.log('payload', payload);
+
+    const a = payload !== undefined ? Math.random() : 0;
+    if (a < 0) {
+      onLeave([{}]);
+    } else if (a > 1) {
+      onJoin([{}]);
+    }
+  };
+
+  const handleMessagesUpdate = (payload: any) => {
+    console.log('handleMessagesUpdate');
+    console.log('payload', payload);
+
+    setChatMessages([]);
   };
 
   useEffect(() => {
@@ -163,8 +139,31 @@ const DbProvider = ({ children }: DbProviderProps) => {
     };
   }, []);
 
+  useRoomListener(
+    supabase,
+    room?.roomName !== undefined,
+    room.roomName,
+    handleRoomUsersUpdate
+  );
+
+  useMessagesListener(
+    supabase,
+    room?.roomName !== undefined,
+    room.roomName,
+    handleMessagesUpdate
+  );
+
   return (
-    <DbContext.Provider value={{ createRoom, joinRoom, leaveRoom }}>
+    <DbContext.Provider
+      value={{
+        login,
+        createRoom,
+        joinRoom,
+        leaveRoom,
+        sendChatMessage,
+        chatMessages,
+      }}
+    >
       {children}
     </DbContext.Provider>
   );

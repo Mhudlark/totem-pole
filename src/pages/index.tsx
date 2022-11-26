@@ -1,7 +1,8 @@
 import { Button, Stack, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
+import { DbContext } from '@/context/dbContext';
 import { useAppDispatch } from '@/store/hooks';
 import { createUser } from '@/store/user/actions';
 import { useDebounce } from '@/utils/hooks';
@@ -12,6 +13,8 @@ const Index = () => {
   // Hooks
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  const { login } = useContext(DbContext);
 
   // Local states
   const [username, setUsername] = useState('');
@@ -30,7 +33,8 @@ const Index = () => {
     updateUsernameDebounced(newUsername);
   };
 
-  const onStart = () => {
+  const onStart = async () => {
+    await login(username);
     dispatch(createUser(username));
     router.push(paths.lobby);
   };
