@@ -10,7 +10,7 @@ import type { MessageSchema, RoomSchema, UserSchema } from './schemas/types';
 export const addUser = async (
   supabase: Supabase,
   username: string
-): Promise<UserSchema[]> => {
+): Promise<UserSchema> => {
   try {
     const { data, error } = await supabase
       .from(dbConfig.channels.users.channel)
@@ -22,7 +22,7 @@ export const addUser = async (
         `${error.message} ============= ${error.hint} ============= ${error.details}`
       );
 
-    return data as UserSchema[];
+    return data?.[0] as UserSchema;
   } catch (error) {
     console.log('error', error);
     throw new Error('Error adding user');

@@ -1,32 +1,24 @@
+import { dbConfig } from '../dbConfig';
 import type { Supabase } from '../types';
+import { usersSchema } from './schemas/users';
 
 /**
- * Delete a channel from the DB
- * @param {number} channel_id
+ * Delete a user from the DB
+ * @param {Supabase} supabase The Supabase client
+ * @param {string} userId The user id
  */
-export const deleteChannel = async (supabase: Supabase, channel_id: string) => {
+export const deleteUser = async (supabase: Supabase, userId: string) => {
   try {
-    const { data } = await supabase
-      .from('channels')
+    const { data, error } = await supabase
+      .from(dbConfig.channels.users.channel)
       .delete()
-      .match({ id: channel_id });
-    return data;
-  } catch (error) {
-    console.log('error', error);
-    throw new Error('Error deleting channel');
-  }
-};
+      .match({ [usersSchema.user_id]: userId });
 
-/**
- * Delete a message from the DB
- * @param {number} message_id
- */
-export const deleteMessage = async (supabase: Supabase, message_id: string) => {
-  try {
-    const { data } = await supabase
-      .from('messages')
-      .delete()
-      .match({ id: message_id });
+    if (error)
+      throw new Error(
+        `${error.message} ============= ${error.hint} ============= ${error.details}`
+      );
+
     return data;
   } catch (error) {
     console.log('error', error);

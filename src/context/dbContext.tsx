@@ -14,6 +14,7 @@ import {
   removeUsersFromRoom,
   resetRoom,
 } from '@/store/room/actions';
+import { setUserId, setUsername } from '@/store/user/actions';
 
 export type DbContextType = {
   login: (username: string) => Promise<void>;
@@ -69,11 +70,13 @@ const DbProvider = ({ children }: DbProviderProps) => {
   const login = async (username: string) => {
     console.log('login');
 
-    const out = await addUser(supabase, username);
+    dispatch(setUsername(username));
 
-    console.log('out', out);
+    const userInfo = await addUser(supabase, username);
 
-    // dispatch(setRoomName(roomName));
+    console.log('user', userInfo);
+
+    if (userInfo?.user_id) dispatch(setUserId(userInfo.user_id));
   };
 
   const createRoom = async () => {
