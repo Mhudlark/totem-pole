@@ -2,6 +2,7 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 
+import { deleteUser } from '@/backend/db/database/delete';
 import { useMessagesListener } from '@/backend/db/database/hooks/useMessagesListener';
 import { useRoomListener } from '@/backend/db/database/hooks/useRoomListener';
 import { addMessage, addRoom, addUser } from '@/backend/db/database/set';
@@ -13,6 +14,7 @@ import {
   addUsersToRoom,
   removeUsersFromRoom,
   resetRoom,
+  setRoom,
 } from '@/store/room/actions';
 import { setUserId, setUsername } from '@/store/user/actions';
 
@@ -74,7 +76,7 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
     const userInfo = await addUser(supabase, username);
 
-    console.log('user', userInfo);
+    console.log('userInfo', userInfo);
 
     if (userInfo?.user_id) dispatch(setUserId(userInfo.user_id));
   };
@@ -82,11 +84,18 @@ const DbProvider = ({ children }: DbProviderProps) => {
   const createRoom = async () => {
     console.log('createRoom');
 
-    const out = await addRoom(supabase);
+    const roomInfo = await addRoom(supabase);
 
-    console.log('out', out);
+    console.log('roomInfo', roomInfo);
 
-    // dispatch(setRoomName(roomName));
+    dispatch(
+      setRoom({
+        roomName: roomInfo.room_id,
+        roomId: roomInfo.room_id,
+        users: [],
+        chatMessages: [],
+      })
+    );
   };
 
   const joinRoom = async (roomName: string) => {
@@ -99,7 +108,9 @@ const DbProvider = ({ children }: DbProviderProps) => {
     // dispatch(setRoomName(roomName));
   };
 
-  const leaveRoom = async () => {
+  const leave = async () => {
+    if (user.userId) await deleteUser(supabase, user.userId);
+
     dispatch(resetRoom());
     unsubscribeAllChannels();
   };
@@ -138,7 +149,7 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
   useEffect(() => {
     return () => {
-      leaveRoom();
+      leave();
     };
   }, []);
 
@@ -162,7 +173,7 @@ const DbProvider = ({ children }: DbProviderProps) => {
         login,
         createRoom,
         joinRoom,
-        leaveRoom,
+        leaveRoom: leave,
         sendChatMessage,
         chatMessages,
       }}

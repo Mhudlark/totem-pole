@@ -41,7 +41,7 @@ export const addMessage = async (
   message: string,
   roomId: string,
   userId: string
-): Promise<MessageSchema[]> => {
+): Promise<MessageSchema> => {
   try {
     const { data, error } = await supabase
       .from('messages')
@@ -53,7 +53,7 @@ export const addMessage = async (
         `${error.message} ============= ${error.hint} ============= ${error.details}`
       );
 
-    return data as MessageSchema[];
+    return data?.[0] as MessageSchema;
   } catch (error) {
     console.log('error', error);
     throw new Error('Error adding message');
@@ -64,7 +64,7 @@ export const addMessage = async (
  * Insert a new room into the DB
  * @param {Supabase} supabase The Supabase client
  */
-export const addRoom = async (supabase: Supabase): Promise<RoomSchema[]> => {
+export const addRoom = async (supabase: Supabase): Promise<RoomSchema> => {
   try {
     const { data, error } = await supabase
       .from(dbConfig.channels.rooms.channel)
@@ -76,8 +76,7 @@ export const addRoom = async (supabase: Supabase): Promise<RoomSchema[]> => {
         `${error.message} ============= ${error.hint} ============= ${error.details}`
       );
 
-    console.log(data);
-    return data as RoomSchema[];
+    return data?.[0] as RoomSchema;
   } catch (error) {
     console.log('error', error);
     throw new Error('Error adding room');
