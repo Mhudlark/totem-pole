@@ -45,9 +45,8 @@ export const fetchMessages = async (
  */
 export const fetchRoom = async (
   supabase: Supabase,
-  roomId: string,
-  setState: (data: any) => void
-): Promise<RoomSchema[]> => {
+  roomId: string
+): Promise<RoomSchema> => {
   try {
     const { data, error } = await supabase
       .from(dbConfig.channels.rooms.channel)
@@ -59,10 +58,8 @@ export const fetchRoom = async (
         `${error.message} ============= ${error.hint} ============= ${error.details}`
       );
 
-    console.log(data);
     const room = data?.[0];
-    if (setState) setState(room);
-    return room as RoomSchema[];
+    return room as RoomSchema;
   } catch (error) {
     console.log('error', error);
     throw new Error('Error fetching users');
@@ -72,13 +69,12 @@ export const fetchRoom = async (
 /**
  * Fetch the users for a given room
  * @param {Supabase} supabase The Supabase client
- * @param {number} roomId The room id
+ * @param {string} roomId The room id
  * @param {function} setState Optionally pass in a hook or callback to set the state
  */
 export const fetchUsers = async (
   supabase: Supabase,
-  roomId: string,
-  setState: (data: any) => void
+  roomId: string
 ): Promise<any[]> => {
   try {
     const { data, error } = await supabase
@@ -100,7 +96,7 @@ export const fetchUsers = async (
 
     console.log(data);
     const room = data?.[0];
-    if (setState) setState(room);
+    console.log('room', room);
     // return room;
     return [{}];
   } catch (error) {

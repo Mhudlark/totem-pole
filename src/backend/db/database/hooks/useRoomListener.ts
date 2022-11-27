@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { dbConfig } from '../../dbConfig';
 import type { Supabase } from '../../types';
+import type { UserSchema } from '../schemas/types';
 import { usersSchema } from '../schemas/users';
 import { PostGresEventType } from '../types';
 
@@ -10,7 +11,7 @@ export const useRoomListener = (
   supabase: Supabase,
   isInRoom: boolean,
   roomId?: string,
-  onSync?: (payload: any) => void
+  onSync?: (newUser: UserSchema) => void
 ) => {
   const [usersChannel, setUsersChannel] = useState<RealtimeChannel | null>(
     null
@@ -19,6 +20,12 @@ export const useRoomListener = (
   useEffect(() => {
     if (isInRoom && roomId) {
       const usersConfig = dbConfig.channels.users;
+
+      console.log(
+        usersConfig.channel,
+        'filter:',
+        `${usersSchema.room_id}=eq.${roomId}`
+      );
 
       const channel = supabase
         .channel(usersConfig.channel)
@@ -30,9 +37,15 @@ export const useRoomListener = (
             table: usersConfig.table,
             filter: `${usersSchema.room_id}=eq.${roomId}`,
           },
-          (payload) => onSync?.(payload)
+          (payload) => onSync?.(payload.new as UserSchema)
         )
-        .subscribe();
+        .subscribe((subscriptionStatus: string) =>
+          console.log(
+            usersConfig.channel,
+            'subscriptionStatus:',
+            subscriptionStatus
+          )
+        );
 
       setUsersChannel(channel);
     }
@@ -42,5 +55,5 @@ export const useRoomListener = (
         usersChannel.unsubscribe();
       }
     };
-  }, []);
+  }, [isInRoom, roomId]);
 };

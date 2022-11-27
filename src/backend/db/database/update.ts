@@ -1,21 +1,24 @@
 import { dbConfig } from '../dbConfig';
 import type { Supabase } from '../types';
+import type { UserSchema } from './schemas/types';
 import { usersSchema } from './schemas/users';
 
 /**
- * Insert a new room into the DB
-//  * @param {string} roomName The room name
+ * Update a user with a room id in the DB
+ * @param {Supabase} supabase The Supabase client
+ * @param {string} userId The user id
+ * @param {string} roomId The room id
  */
 export const addUserToRoom = async (
   supabase: Supabase,
   userId: string,
   roomId: string
-) => {
+): Promise<UserSchema> => {
   try {
     const { data, error } = await supabase
       .from(dbConfig.channels.users.channel)
       .update({ [usersSchema.room_id]: roomId })
-      .eq(usersSchema.user_id, userId)
+      .match({ [usersSchema.user_id]: userId })
       .select();
 
     if (error)
@@ -23,10 +26,9 @@ export const addUserToRoom = async (
         `${error.message} ============= ${error.hint} ============= ${error.details}`
       );
 
-    console.log(data);
-    return data;
+    return data?.[0] as UserSchema;
   } catch (error) {
     console.log('error', error);
-    throw new Error('Error adding channel');
+    throw new Error('Error adding user to room');
   }
 };

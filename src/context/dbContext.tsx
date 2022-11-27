@@ -3,12 +3,13 @@ import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import { deleteUser } from '@/backend/db/database/delete';
+import { fetchRoom, fetchUsers } from '@/backend/db/database/get';
 import { useMessagesListener } from '@/backend/db/database/hooks/useMessagesListener';
 import { useRoomListener } from '@/backend/db/database/hooks/useRoomListener';
+import type { UserSchema } from '@/backend/db/database/schemas/types';
 import { addMessage, addRoom, addUser } from '@/backend/db/database/set';
 import { addUserToRoom } from '@/backend/db/database/update';
-import type { ChatMessage } from '@/sharedTypes';
-import { initUser } from '@/sharedUtils/user';
+import type { ChatMessage, Room, User } from '@/sharedTypes';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   addUsersToRoom,
@@ -49,11 +50,7 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
-  const onJoin = (payload: any[]) => {
-    const newUsers = payload.map((clientPayload) => {
-      return initUser(clientPayload.user.userId, clientPayload.user.username);
-    });
-
+  const onJoin = (newUsers: User[]) => {
     dispatch(addUsersToRoom(newUsers));
   };
 
@@ -88,11 +85,19 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
     console.log('roomInfo', roomInfo);
 
+    const userInfo = await addUserToRoom(
+      supabase,
+      user.userId,
+      roomInfo.room_id
+    );
+
+    console.log('userInfo', userInfo);
+
     dispatch(
       setRoom({
         roomName: roomInfo.room_id,
         roomId: roomInfo.room_id,
-        users: [],
+        users: [user],
         chatMessages: [],
       })
     );
@@ -101,11 +106,28 @@ const DbProvider = ({ children }: DbProviderProps) => {
   const joinRoom = async (roomName: string) => {
     console.log('joinRoom');
 
-    const out = await addUserToRoom(supabase, '', roomName);
+    if (!user.userId) return;
 
-    console.log('out', out);
+    const userInfo = await addUserToRoom(supabase, user.userId, roomName);
 
-    // dispatch(setRoomName(roomName));
+    console.log('userInfo', userInfo);
+
+    const roomInfo = await fetchRoom(supabase, userInfo.room_id);
+
+    console.log('roomInfos', roomInfo);
+
+    const usersInfo = await fetchUsers(supabase, userInfo.room_id);
+
+    console.log('usersInfo', usersInfo);
+
+    const roomJoined: Room = {
+      roomName: roomInfo.room_id,
+      roomId: roomInfo.room_id,
+      users: [],
+      chatMessages: [],
+    };
+
+    dispatch(setRoom(roomJoined));
   };
 
   const leave = async () => {
@@ -128,15 +150,20 @@ const DbProvider = ({ children }: DbProviderProps) => {
     console.log('out', out);
   };
 
-  const handleRoomUsersUpdate = (payload: any) => {
+  const handleRoomUsersUpdate = (newUserInfo: UserSchema) => {
     console.log('handleRoomUsersUpdate');
-    console.log('payload', payload);
+    console.log('newUser', newUserInfo);
 
-    const a = payload !== undefined ? Math.random() : 0;
+    const newUser: User = {
+      userId: newUserInfo.user_id,
+      username: newUserInfo.username,
+    };
+
+    onJoin([newUser]);
+
+    const a = newUserInfo !== undefined ? Math.random() : 0;
     if (a < 0) {
       onLeave([{}]);
-    } else if (a > 1) {
-      onJoin([{}]);
     }
   };
 
