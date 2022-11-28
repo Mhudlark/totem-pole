@@ -3,13 +3,14 @@ import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import { deleteUser } from '@/backend/db/database/delete';
-import { fetchRoom, fetchUsers } from '@/backend/db/database/get';
+import { fetchUsers } from '@/backend/db/database/get';
 import { useMessagesListener } from '@/backend/db/database/hooks/useMessagesListener';
 import { useRoomListener } from '@/backend/db/database/hooks/useRoomListener';
 import type { UserSchema } from '@/backend/db/database/schemas/types';
 import { addMessage, addRoom, addUser } from '@/backend/db/database/set';
 import { addUserToRoom } from '@/backend/db/database/update';
 import type { ChatMessage, Room, User } from '@/sharedTypes';
+import { initUser } from '@/sharedUtils/user';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   addUsersToRoom,
@@ -112,18 +113,18 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
     console.log('userInfo', userInfo);
 
-    const roomInfo = await fetchRoom(supabase, userInfo.room_id);
+    const roomWithUsersInfo = await fetchUsers(supabase, userInfo.room_id);
 
-    console.log('roomInfos', roomInfo);
+    console.log('roomWithUsersInfo', roomWithUsersInfo);
 
-    const usersInfo = await fetchUsers(supabase, userInfo.room_id);
-
-    console.log('usersInfo', usersInfo);
+    const users = roomWithUsersInfo.users.map((roomUser) =>
+      initUser(roomUser.user_id, roomUser.username)
+    );
 
     const roomJoined: Room = {
-      roomName: roomInfo.room_id,
-      roomId: roomInfo.room_id,
-      users: [],
+      roomName: roomWithUsersInfo.room_id,
+      roomId: roomWithUsersInfo.room_id,
+      users,
       chatMessages: [],
     };
 

@@ -2,7 +2,7 @@ import { dbConfig } from '../dbConfig';
 import type { Supabase } from '../types';
 import { messagesSchema } from './schemas/messages';
 import { roomsSchema } from './schemas/rooms';
-import type { MessageSchema, RoomSchema } from './schemas/types';
+import type { MessageSchema, RoomSchema, UserSchema } from './schemas/types';
 
 /**
  * Fetch all messages and their authors for a given room
@@ -66,6 +66,8 @@ export const fetchRoom = async (
   }
 };
 
+export type RoomWithUsersSchema = RoomSchema & { users: UserSchema[] };
+
 /**
  * Fetch the users for a given room
  * @param {Supabase} supabase The Supabase client
@@ -75,7 +77,7 @@ export const fetchRoom = async (
 export const fetchUsers = async (
   supabase: Supabase,
   roomId: string
-): Promise<any[]> => {
+): Promise<RoomWithUsersSchema> => {
   try {
     const { data, error } = await supabase
       .from(dbConfig.channels.rooms.channel)
@@ -94,11 +96,8 @@ export const fetchUsers = async (
         `${error.message} ============= ${error.hint} ============= ${error.details}`
       );
 
-    console.log(data);
     const room = data?.[0];
-    console.log('room', room);
-    // return room;
-    return [{}];
+    return room as unknown as RoomWithUsersSchema;
   } catch (error) {
     console.log('error', error);
     throw new Error('Error fetching users');
