@@ -6,9 +6,9 @@ import { useAppSelector } from '@/store/hooks';
 
 const Index = () => {
   // Redux states
-  const room = useAppSelector((state) => state.room);
+  const { user, room } = useAppSelector((state) => state);
 
-  const { chatMessages, sendChatMessage } = useContext(DbContext);
+  const { leaveRoom, chatMessages, sendChatMessage } = useContext(DbContext);
 
   // Local States
   const [chatMessage, setChatMessage] = useState('');
@@ -20,7 +20,31 @@ const Index = () => {
 
   return (
     <Stack sx={{ gap: 4 }}>
-      <Typography>{room.roomName}</Typography>
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+          p: 1.5,
+          px: 2,
+          backgroundColor: '#ededed',
+          borderRadius: 2,
+        }}
+      >
+        <Button variant="outlined" onClick={leaveRoom}>
+          Leave
+        </Button>
+      </Stack>
+      <Typography
+        variant="h5"
+        sx={{
+          p: 1.5,
+          px: 2,
+          backgroundColor: '#ededed',
+          borderRadius: 2,
+        }}
+      >
+        {`Room code: ${room.roomName || 'N/A'}`}
+      </Typography>
       <Stack
         sx={{
           gap: 1,
@@ -32,9 +56,9 @@ const Index = () => {
         }}
       >
         {Array.isArray(room?.users) &&
-          room.users.map((user) => (
+          room.users.map((roomUsers) => (
             <Box
-              key={user.username}
+              key={roomUsers.username}
               sx={{
                 backgroundColor: 'white',
                 p: 1,
@@ -43,7 +67,7 @@ const Index = () => {
                 width: 'fit-content',
               }}
             >
-              {user.username}
+              {roomUsers.username}
             </Box>
           ))}
       </Stack>
@@ -57,7 +81,10 @@ const Index = () => {
             borderRadius: 2,
           }}
         >
-          <TextField onChange={(event) => setChatMessage(event.target.value)} />
+          <TextField
+            value={chatMessage}
+            onChange={(event) => setChatMessage(event.target.value)}
+          />
           <Button variant="outlined" onClick={sendMessage}>
             Send
           </Button>
@@ -77,11 +104,17 @@ const Index = () => {
               <Box
                 key={index}
                 sx={{
-                  backgroundColor: 'white',
                   p: 1,
                   px: 2,
                   borderRadius: 2,
                   width: 'fit-content',
+                  alignSelf:
+                    msg.author.userId === user.userId
+                      ? 'flex-end'
+                      : 'flex-start',
+                  backgroundColor:
+                    msg.author.userId === user.userId ? '#4589fd' : 'white',
+                  color: msg.author.userId === user.userId ? 'white' : 'black',
                 }}
               >
                 {msg.message}
