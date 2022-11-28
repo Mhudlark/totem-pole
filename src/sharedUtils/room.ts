@@ -1,10 +1,20 @@
-import type { Room } from '@/sharedTypes';
+import type { ChatMessage, Room, User } from '@/sharedTypes';
 
-export type NewRoom = (roomId: string, roomName: string) => Room;
+export type InitRoom = (
+  roomId: string,
+  roomName: string,
+  users?: User[],
+  chatMessages?: ChatMessage[]
+) => Room;
 
-export const initRoom: NewRoom = (roomId, roomName) => ({
+export const initRoom: InitRoom = (
   roomId,
   roomName,
-  users: [],
-  chatMessages: [],
+  users = [],
+  chatMessages = []
+) => ({
+  roomId,
+  roomName,
+  users,
+  chatMessages,
 });
