@@ -7,7 +7,6 @@ import {
   ADD_USER_TO_ROOM,
   ADD_USERS_TO_ROOM,
   REMOVE_USER_FROM_ROOM,
-  REMOVE_USERS_FROM_ROOM,
   RESET_ROOM,
   SET_ROOM,
   SET_ROOM_NAME,
@@ -88,7 +87,7 @@ describe('Room reducer', () => {
 
   it('remove user from room', () => {
     const mockRoomNumUsers = mockRoom.users.length;
-    const userToBeRemoved = mockRoom.users[0]?.username ?? '';
+    const userToBeRemoved = mockRoom.users[0]?.userId ?? '';
 
     const newReducer = roomReducer(mockRoom, {
       type: REMOVE_USER_FROM_ROOM,
@@ -103,31 +102,5 @@ describe('Room reducer', () => {
       newReducer.users.filter((users) => users.username === userToBeRemoved)
         .length
     ).toEqual(0);
-  });
-
-  it('remove users from room', () => {
-    const mockRoomNumUsers = mockRoom.users.length;
-    const numUsersToBeRemoved = Math.min(2, mockRoomNumUsers);
-    const usersToBeRemoved = mockRoom.users
-      .slice(0, numUsersToBeRemoved)
-      .map((user) => user.username);
-
-    const newReducer = roomReducer(mockRoom, {
-      type: REMOVE_USERS_FROM_ROOM,
-      payload: usersToBeRemoved,
-    });
-
-    // Check that the number of users in the room is correct
-    expect(newReducer.users.length).toEqual(
-      mockRoomNumUsers - numUsersToBeRemoved
-    );
-
-    // Check that the removed user is not in the room
-    usersToBeRemoved.forEach((userToBeRemoved) => {
-      const filteredReducerUsers = newReducer.users.filter((user) => {
-        return user.username === userToBeRemoved;
-      });
-      expect(filteredReducerUsers.length).toEqual(0);
-    });
   });
 });

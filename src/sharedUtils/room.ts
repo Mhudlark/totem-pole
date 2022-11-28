@@ -1,8 +1,10 @@
 import type { Room } from '@/sharedTypes';
 
-export type NewRoom = (roomName: string) => Room;
+export type NewRoom = (roomId: string, roomName: string) => Room;
 
-export const newRoom: NewRoom = (roomName) => ({
+export const initRoom: NewRoom = (roomId, roomName) => ({
+  roomId,
   roomName,
   users: [],
+  chatMessages: [],
 });
