@@ -1,12 +1,21 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import type { ReactNode } from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 import { deleteUser } from '@/backend/db/database/delete';
 import { fetchUsers } from '@/backend/db/database/get';
 import { useMessagesListener } from '@/backend/db/database/hooks/useMessagesListener';
 import { useRoomListener } from '@/backend/db/database/hooks/useRoomListener';
-import type { UserSchema } from '@/backend/db/database/schemas/types';
+import type {
+  MessageSchema,
+  UserSchema,
+} from '@/backend/db/database/schemas/types';
 import { addMessage, addRoom, addUser } from '@/backend/db/database/set';
 import { addUserToRoom } from '@/backend/db/database/update';
 import type { ChatMessage, Room, User } from '@/sharedTypes';
@@ -141,19 +150,14 @@ const DbProvider = ({ children }: DbProviderProps) => {
   const sendChatMessage = async (message: string) => {
     console.log('sendChatMessage');
 
-    const out = await addMessage(
-      supabase,
-      message,
-      room.roomName,
-      user.username
-    );
+    const out = await addMessage(supabase, message, room.roomId, user.userId);
 
     console.log('out', out);
   };
 
   const handleRoomUsersUpdate = (newUserInfo: UserSchema) => {
     console.log('handleRoomUsersUpdate');
-    console.log('newUser', newUserInfo);
+    console.log('newUserInfo', newUserInfo);
 
     const newUser: User = {
       userId: newUserInfo.user_id,
@@ -168,12 +172,32 @@ const DbProvider = ({ children }: DbProviderProps) => {
     }
   };
 
-  const handleMessagesUpdate = (payload: any) => {
-    console.log('handleMessagesUpdate');
-    console.log('payload', payload);
+  const handleMessagesUpdate = useCallback(
+    (newMessageInfo: MessageSchema) => {
+      console.log('handleMessagesUpdate');
+      console.log('newMessageInfo', newMessageInfo);
 
-    setChatMessages([]);
-  };
+      console.log('room.users', room.users);
+
+      const author = room.users.find(
+        (roomUser) => roomUser.userId === newMessageInfo.author
+      );
+
+      if (!author)
+        throw new Error(
+          `Chat message author '${newMessageInfo.author}' not found`
+        );
+
+      const newMessage: ChatMessage = {
+        messageId: newMessageInfo.message_id,
+        message: newMessageInfo.message,
+        author: author as User,
+      };
+
+      setChatMessages((prevChatMessages) => [...prevChatMessages, newMessage]);
+    },
+    [room]
+  );
 
   useEffect(() => {
     return () => {

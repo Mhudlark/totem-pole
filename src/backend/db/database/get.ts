@@ -72,7 +72,6 @@ export type RoomWithUsersSchema = RoomSchema & { users: UserSchema[] };
  * Fetch the users for a given room
  * @param {Supabase} supabase The Supabase client
  * @param {string} roomId The room id
- * @param {function} setState Optionally pass in a hook or callback to set the state
  */
 export const fetchUsers = async (
   supabase: Supabase,
@@ -98,6 +97,46 @@ export const fetchUsers = async (
 
     const room = data?.[0];
     return room as unknown as RoomWithUsersSchema;
+  } catch (error) {
+    console.log('error', error);
+    throw new Error('Error fetching users');
+  }
+};
+
+export type AllRoomSchema = RoomWithUsersSchema & { messages: MessageSchema[] };
+
+/**
+ * Fetch a given room
+ * @param {Supabase} supabase The Supabase client
+ * @param {string} roomId The room id
+ */
+export const fetchAllRoomFromDB = async (
+  supabase: Supabase,
+  roomId: string
+): Promise<AllRoomSchema> => {
+  try {
+    const { data, error } = await supabase
+      .from(dbConfig.channels.rooms.channel)
+      .select(
+        `
+      *,
+      ${dbConfig.channels.users.table} (
+        *
+      ),
+      ${dbConfig.channels.messages.table} (
+        *
+      )
+    `
+      )
+      .eq(roomsSchema.room_id, roomId);
+
+    if (error)
+      throw new Error(
+        `${error.message} ============= ${error.hint} ============= ${error.details}`
+      );
+
+    const room = data?.[0];
+    return room as unknown as AllRoomSchema;
   } catch (error) {
     console.log('error', error);
     throw new Error('Error fetching users');
