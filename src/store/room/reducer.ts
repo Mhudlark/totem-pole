@@ -9,7 +9,6 @@ import {
   ADD_USER_TO_ROOM,
   ADD_USERS_TO_ROOM,
   REMOVE_USER_FROM_ROOM,
-  REMOVE_USERS_FROM_ROOM,
   RESET_ROOM,
   SET_ROOM,
   SET_ROOM_NAME,
@@ -40,16 +39,8 @@ const roomReducer: Reducer<
   }
 
   if (action.type === REMOVE_USER_FROM_ROOM) {
-    const removedUser = action.payload as string;
-    const newUsers = room.users.filter((user) => user.username !== removedUser);
-    return { ...room, users: newUsers };
-  }
-
-  if (action.type === REMOVE_USERS_FROM_ROOM) {
-    const removedUsers = action.payload as string[];
-    const newUsers = room.users.filter(
-      (user) => !removedUsers.includes(user.username)
-    );
+    const removedUserId = action.payload as string;
+    const newUsers = room.users.filter((user) => user.userId !== removedUserId);
     return { ...room, users: newUsers };
   }
 

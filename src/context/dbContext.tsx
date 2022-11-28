@@ -8,7 +8,11 @@ import {
   useState,
 } from 'react';
 
-import { deleteUser } from '@/backend/db/database/delete';
+import {
+  deleteMessagesForRoom,
+  deleteRoom,
+  deleteUser,
+} from '@/backend/db/database/delete';
 import { fetchUsers } from '@/backend/db/database/get';
 import { useMessagesListener } from '@/backend/db/database/hooks/useMessagesListener';
 import { useRoomListener } from '@/backend/db/database/hooks/useRoomListener';
@@ -23,7 +27,7 @@ import { initUser } from '@/sharedUtils/user';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   addUsersToRoom,
-  removeUsersFromRoom,
+  removeUserFromRoom,
   resetRoom,
   setRoom,
 } from '@/store/room/actions';
@@ -64,12 +68,8 @@ const DbProvider = ({ children }: DbProviderProps) => {
     dispatch(addUsersToRoom(newUsers));
   };
 
-  const onLeave = (payload: any[]) => {
-    const leftUsersUsernames = payload.map(
-      (presence) => presence.user.username
-    );
-
-    dispatch(removeUsersFromRoom(leftUsersUsernames));
+  const onLeave = (deletedUserId: string) => {
+    dispatch(removeUserFromRoom(deletedUserId));
   };
 
   const unsubscribeAllChannels = () => {
@@ -141,7 +141,22 @@ const DbProvider = ({ children }: DbProviderProps) => {
   };
 
   const leave = async () => {
+    console.log('leave');
+
+    const isRoomEmpty = room.users.length === 1;
+
+    // Delete messages first (foreign key)
+    if (isRoomEmpty) {
+      await deleteMessagesForRoom(supabase, room.roomId);
+    }
+
+    // Delete user next (foreign key)
     if (user.userId) await deleteUser(supabase, user.userId);
+
+    // Delete room last
+    if (isRoomEmpty) {
+      await deleteRoom(supabase, room.roomId);
+    }
 
     dispatch(resetRoom());
     unsubscribeAllChannels();
@@ -155,29 +170,34 @@ const DbProvider = ({ children }: DbProviderProps) => {
     console.log('out', out);
   };
 
-  const handleRoomUsersUpdate = (newUserInfo: UserSchema) => {
-    console.log('handleRoomUsersUpdate');
-    console.log('newUserInfo', newUserInfo);
+  const handleRoomUsersUpdate = useCallback(
+    (newUserInfo: UserSchema) => {
+      console.log('handleRoomUsersUpdate');
+      console.log('newUserInfo', newUserInfo);
 
-    const newUser: User = {
-      userId: newUserInfo.user_id,
-      username: newUserInfo.username,
-    };
+      const newUser: User = {
+        userId: newUserInfo.user_id,
+        username: newUserInfo.username,
+      };
 
-    onJoin([newUser]);
+      onJoin([newUser]);
+    },
+    [onJoin]
+  );
 
-    const a = newUserInfo !== undefined ? Math.random() : 0;
-    if (a < 0) {
-      onLeave([{}]);
-    }
-  };
+  const handleRoomUsersDelete = useCallback(
+    (deletedUserId: string) => {
+      console.log('handleRoomUsersDelete');
+      console.log('deletedUserId', deletedUserId);
+      onLeave(deletedUserId);
+    },
+    [onLeave]
+  );
 
   const handleMessagesUpdate = useCallback(
     (newMessageInfo: MessageSchema) => {
       console.log('handleMessagesUpdate');
       console.log('newMessageInfo', newMessageInfo);
-
-      console.log('room.users', room.users);
 
       const author = room.users.find(
         (roomUser) => roomUser.userId === newMessageInfo.author
@@ -209,7 +229,8 @@ const DbProvider = ({ children }: DbProviderProps) => {
     supabase,
     room?.roomName !== undefined,
     room.roomName,
-    handleRoomUsersUpdate
+    handleRoomUsersUpdate,
+    handleRoomUsersDelete
   );
 
   useMessagesListener(

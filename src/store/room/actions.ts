@@ -10,7 +10,6 @@ export const SET_ROOM_NAME = 'SET_ROOM_NAME';
 export const ADD_USER_TO_ROOM = 'ADD_USER_TO_ROOM';
 export const ADD_USERS_TO_ROOM = 'ADD_USERS_TO_ROOM';
 export const REMOVE_USER_FROM_ROOM = 'REMOVE_USER_FROM_ROOM';
-export const REMOVE_USERS_FROM_ROOM = 'REMOVE_USERS_FROM_ROOM';
 
 type ResetRoom = () => Action<null>;
 
@@ -47,18 +46,11 @@ export const addUsersToRoom: AddUsersToRoom = (users) => ({
   payload: users,
 });
 
-type RemoveUserFromRoom = (username: string) => Action<string>;
+type RemoveUserFromRoom = (userId: string) => Action<string>;
 
-export const removeUserFromRoom: RemoveUserFromRoom = (username) => ({
+export const removeUserFromRoom: RemoveUserFromRoom = (userId) => ({
   type: REMOVE_USER_FROM_ROOM,
-  payload: username,
-});
-
-type RemoveUsersFromRoom = (usernames: string[]) => Action<string[]>;
-
-export const removeUsersFromRoom: RemoveUsersFromRoom = (usernames) => ({
-  type: REMOVE_USERS_FROM_ROOM,
-  payload: usernames,
+  payload: userId,
 });
 
 // ====================== Thunk Actions =========================

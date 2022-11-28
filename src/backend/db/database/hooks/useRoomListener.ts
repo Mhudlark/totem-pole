@@ -11,7 +11,8 @@ export const useRoomListener = (
   supabase: Supabase,
   isInRoom: boolean,
   roomId?: string,
-  onSync?: (newUser: UserSchema) => void
+  onUpdate?: (newUser: UserSchema) => void,
+  onDelete?: (deletedUserId: string) => void
 ) => {
   const [usersChannel, setUsersChannel] = useState<RealtimeChannel | null>(
     null
@@ -37,7 +38,17 @@ export const useRoomListener = (
             table: usersConfig.table,
             filter: `${usersSchema.room_id}=eq.${roomId}`,
           },
-          (payload) => onSync?.(payload.new as UserSchema)
+          (payload) => onUpdate?.(payload.new as UserSchema)
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: PostGresEventType.DELETE,
+            schema: usersConfig.schema,
+            table: usersConfig.table,
+            filter: `${usersSchema.room_id}=eq.${roomId}`,
+          },
+          (payload) => onDelete?.(payload.old.user_id as string)
         )
         .subscribe((subscriptionStatus: string) =>
           console.log(
