@@ -1,18 +1,20 @@
 import { dbConfig } from '../../dbConfig';
 import type { Supabase } from '../../types';
-import type { RoomSchema } from '../schemas/types';
+import type { UserSchema } from '../schemas/types';
 
 /**
- * Insert a new room into the DB
+ * Insert a new user into the DB
  * @param {Supabase} supabase The Supabase client
+ * @param {string} username The username of the user
  */
-export const insertRoomIntoDB = async (
-  supabase: Supabase
-): Promise<RoomSchema> => {
+export const insertUserIntoDB = async (
+  supabase: Supabase,
+  username: string
+): Promise<UserSchema> => {
   try {
     const { data, error } = await supabase
-      .from(dbConfig.channels.rooms.channel)
-      .insert({})
+      .from(dbConfig.channels.users.channel)
+      .insert([{ username }])
       .select();
 
     if (error)
@@ -20,9 +22,9 @@ export const insertRoomIntoDB = async (
         `${error.message} ============= ${error.hint} ============= ${error.details}`
       );
 
-    return data?.[0] as RoomSchema;
+    return data?.[0] as UserSchema;
   } catch (error) {
     console.log('error', error);
-    throw new Error('Error adding room');
+    throw new Error('Error adding user');
   }
 };

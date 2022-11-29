@@ -1,28 +1,27 @@
 import { dbConfig } from '../../dbConfig';
 import type { Supabase } from '../../types';
-import type { RoomSchema } from '../schemas/types';
+import { roomsSchema } from '../schemas/rooms';
 
 /**
- * Insert a new room into the DB
+ * Delete a room from the DB
  * @param {Supabase} supabase The Supabase client
+ * @param {string} roomId The room id
  */
-export const insertRoomIntoDB = async (
-  supabase: Supabase
-): Promise<RoomSchema> => {
+export const deleteRoomFromDB = async (supabase: Supabase, roomId: string) => {
   try {
     const { data, error } = await supabase
       .from(dbConfig.channels.rooms.channel)
-      .insert({})
-      .select();
+      .delete()
+      .match({ [roomsSchema.room_id]: roomId });
 
     if (error)
       throw new Error(
         `${error.message} ============= ${error.hint} ============= ${error.details}`
       );
 
-    return data?.[0] as RoomSchema;
+    return data;
   } catch (error) {
     console.log('error', error);
-    throw new Error('Error adding room');
+    throw new Error('Error deleting room');
   }
 };

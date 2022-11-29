@@ -6,14 +6,19 @@ export interface MessageSchema {
   author: string;
 }
 
-export interface RoomSchema {
-  room_id: string;
-  created_at: string;
-}
-
 export interface UserSchema {
   user_id: string;
   created_at: string;
   username: string;
   room_id: string;
+}
+
+export interface BaseRoomSchema {
+  room_id: string;
+  created_at: string;
+}
+
+export interface RoomSchema extends BaseRoomSchema {
+  users: UserSchema[];
+  messages: MessageSchema[];
 }

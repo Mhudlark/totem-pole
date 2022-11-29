@@ -1,7 +1,7 @@
-import { dbConfig } from '../dbConfig';
-import type { Supabase } from '../types';
-import type { UserSchema } from './schemas/types';
-import { usersSchema } from './schemas/users';
+import { dbConfig } from '../../dbConfig';
+import type { Supabase } from '../../types';
+import type { UserSchema } from '../schemas/types';
+import { usersSchema } from '../schemas/users';
 
 /**
  * Update a user with a room id in the DB
@@ -9,7 +9,7 @@ import { usersSchema } from './schemas/users';
  * @param {string} userId The user id
  * @param {string} roomId The room id
  */
-export const addUserToRoom = async (
+export const updateUserRoomIdInDB = async (
   supabase: Supabase,
   userId: string,
   roomId: string

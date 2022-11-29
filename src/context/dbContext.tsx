@@ -8,21 +8,22 @@ import {
   useState,
 } from 'react';
 
-import {
-  deleteMessagesForRoom,
-  deleteRoom,
-  deleteUser,
-} from '@/backend/db/database/delete';
-import { fetchUsers } from '@/backend/db/database/get';
 import { useMessagesListener } from '@/backend/db/database/hooks/useMessagesListener';
 import { useRoomListener } from '@/backend/db/database/hooks/useRoomListener';
+import { deleteMessagesForRoomFromDB } from '@/backend/db/database/messages/delete';
+import { insertMessageIntoDB } from '@/backend/db/database/messages/insert';
+import { deleteRoomFromDB } from '@/backend/db/database/room/delete';
+import { insertRoomIntoDB } from '@/backend/db/database/room/insert';
+import { selectRoomFromDB } from '@/backend/db/database/room/select';
 import type {
   MessageSchema,
   UserSchema,
 } from '@/backend/db/database/schemas/types';
-import { addMessage, addRoom, addUser } from '@/backend/db/database/set';
-import { addUserToRoom } from '@/backend/db/database/update';
+import { deleteUserFromDB } from '@/backend/db/database/user/delete';
+import { insertUserIntoDB } from '@/backend/db/database/user/insert';
+import { updateUserRoomIdInDB } from '@/backend/db/database/user/update';
 import type { ChatMessage, Room, User } from '@/sharedTypes';
+import { initChatMessageFromAuthorId } from '@/sharedUtils/chatMessage';
 import { initUser } from '@/sharedUtils/user';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -81,7 +82,7 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
     dispatch(setUsername(username));
 
-    const userInfo = await addUser(supabase, username);
+    const userInfo = await insertUserIntoDB(supabase, username);
 
     console.log('userInfo', userInfo);
 
@@ -91,11 +92,11 @@ const DbProvider = ({ children }: DbProviderProps) => {
   const createRoom = async () => {
     console.log('createRoom');
 
-    const roomInfo = await addRoom(supabase);
+    const roomInfo = await insertRoomIntoDB(supabase);
 
     console.log('roomInfo', roomInfo);
 
-    const userInfo = await addUserToRoom(
+    const userInfo = await updateUserRoomIdInDB(
       supabase,
       user.userId,
       roomInfo.room_id
@@ -118,23 +119,33 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
     if (!user.userId) return;
 
-    const userInfo = await addUserToRoom(supabase, user.userId, roomName);
-
+    const userInfo = await updateUserRoomIdInDB(
+      supabase,
+      user.userId,
+      roomName
+    );
     console.log('userInfo', userInfo);
 
-    const roomWithUsersInfo = await fetchUsers(supabase, userInfo.room_id);
+    const roomInfo = await selectRoomFromDB(supabase, userInfo.room_id);
+    console.log('roomInfo', roomInfo);
 
-    console.log('roomWithUsersInfo', roomWithUsersInfo);
-
-    const users = roomWithUsersInfo.users.map((roomUser) =>
+    const roomUsers = roomInfo.users.map((roomUser) =>
       initUser(roomUser.user_id, roomUser.username)
+    );
+    const roomChatMessages = roomInfo.messages.map((roomMessage) =>
+      initChatMessageFromAuthorId(
+        roomMessage.message_id,
+        roomMessage.message,
+        roomMessage.author,
+        roomUsers
+      )
     );
 
     const roomJoined: Room = {
-      roomName: roomWithUsersInfo.room_id,
-      roomId: roomWithUsersInfo.room_id,
-      users,
-      chatMessages: [],
+      roomName: roomInfo.room_id,
+      roomId: roomInfo.room_id,
+      users: roomUsers,
+      chatMessages: roomChatMessages,
     };
 
     dispatch(setRoom(roomJoined));
@@ -147,15 +158,15 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
     // Delete messages first (foreign key)
     if (isRoomEmpty) {
-      await deleteMessagesForRoom(supabase, room.roomId);
+      await deleteMessagesForRoomFromDB(supabase, room.roomId);
     }
 
     // Delete user next (foreign key)
-    if (user.userId) await deleteUser(supabase, user.userId);
+    if (user.userId) await deleteUserFromDB(supabase, user.userId);
 
     // Delete room last
     if (isRoomEmpty) {
-      await deleteRoom(supabase, room.roomId);
+      await deleteRoomFromDB(supabase, room.roomId);
     }
 
     dispatch(resetRoom());
@@ -165,7 +176,12 @@ const DbProvider = ({ children }: DbProviderProps) => {
   const sendChatMessage = async (message: string) => {
     console.log('sendChatMessage');
 
-    const out = await addMessage(supabase, message, room.roomId, user.userId);
+    const out = await insertMessageIntoDB(
+      supabase,
+      message,
+      room.roomId,
+      user.userId
+    );
 
     console.log('out', out);
   };
