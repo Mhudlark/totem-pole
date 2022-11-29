@@ -45,8 +45,8 @@
 Run the following command on your local environment:
 
 ```shell
-git clone --depth=1 https://github.com/Mhudlark/totem-pole-frontend.git
-cd totem-pole-frontend
+git clone --depth=1 https://github.com/Mhudlark/totem-pole.git
+cd totem-pole
 yarn install
 ```
 
@@ -86,7 +86,6 @@ You can easily configure Next js Boilerplate. Please change the following file:
 - `src/utils/AppConfig.ts`: configuration file
 - `src/templates/Main.tsx`: default theme
 
-
 ### Deploy to production
 
 You can see the results locally in production mode with:
@@ -106,11 +105,9 @@ npm run build-prod
 
 Now, your blog is ready to be deployed. All generated files are located at `out` folder, which you can deploy with any hosting service.
 
-
 ### Testing
 
 All tests are colocated with the source code inside the same directory. So, it makes it easier to find them. Unfortunately, it is not possible with the `pages` folder which is used by Next.js for routing. So, what is why we have a `pages.test` folder to write tests from files located in `pages` folder.
-
 
 ### VSCode information (optional)
 

@@ -1,5 +1,5 @@
 {
-  "name": "totem-pole-frontend",
+  "name": "totem-pole",
   "version": "0.0.1",
   "scripts": {
     "dev": "next dev",
