@@ -1,5 +1,5 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { dbConfig } from '../../dbConfig';
 import type { Supabase } from '../../types';
@@ -7,13 +7,31 @@ import type { UserSchema } from '../schemas/types';
 import { usersSchema } from '../schemas/users';
 import { PostGresEventType } from '../types';
 
+export type OnUpdate = (newUser: UserSchema) => void;
+export type OnDelete = (deletedUserId: string) => void;
+
 export const useRoomListener = (
   supabase: Supabase,
   isInRoom: boolean,
   roomId?: string,
-  onUpdate?: (newUser: UserSchema) => void,
-  onDelete?: (deletedUserId: string) => void
+  onUpdate?: OnUpdate,
+  onDelete?: OnDelete
 ) => {
+  const savedOnUpdate = useRef<OnUpdate>();
+  const savedOnDelete = useRef<OnDelete>();
+
+  // Update ref.current value if handler changes.
+  // This allows our effect below to always get latest handler
+  // without us needing to pass it in effect deps array
+  // and potentially cause effect to re-run every render.
+  useEffect(() => {
+    savedOnUpdate.current = onUpdate;
+  }, [onUpdate]);
+
+  useEffect(() => {
+    savedOnDelete.current = onDelete;
+  }, [onDelete]);
+
   const [usersChannel, setUsersChannel] = useState<RealtimeChannel | null>(
     null
   );
@@ -21,12 +39,6 @@ export const useRoomListener = (
   useEffect(() => {
     if (isInRoom && roomId) {
       const usersConfig = dbConfig.channels.users;
-
-      console.log(
-        usersConfig.channel,
-        'filter:',
-        `${usersSchema.room_id}=eq.${roomId}`
-      );
 
       const channel = supabase
         .channel(usersConfig.channel)
@@ -38,7 +50,7 @@ export const useRoomListener = (
             table: usersConfig.table,
             filter: `${usersSchema.room_id}=eq.${roomId}`,
           },
-          (payload) => onUpdate?.(payload.new as UserSchema)
+          (payload) => savedOnUpdate.current?.(payload.new as UserSchema)
         )
         .on(
           'postgres_changes',
@@ -48,15 +60,9 @@ export const useRoomListener = (
             table: usersConfig.table,
             filter: `${usersSchema.room_id}=eq.${roomId}`,
           },
-          (payload) => onDelete?.(payload.old.user_id as string)
+          (payload) => savedOnDelete.current?.(payload.old.user_id as string)
         )
-        .subscribe((subscriptionStatus: string) =>
-          console.log(
-            usersConfig.channel,
-            'subscriptionStatus:',
-            subscriptionStatus
-          )
-        );
+        .subscribe();
 
       setUsersChannel(channel);
     }
