@@ -101,24 +101,38 @@ const Index = () => {
         >
           {Array.isArray(chatMessages) &&
             chatMessages.map((msg, index) => (
-              <Box
+              <Stack
                 key={index}
                 sx={{
-                  p: 1,
-                  px: 2,
-                  borderRadius: 2,
-                  width: 'fit-content',
+                  gap: 0.5,
                   alignSelf:
                     msg.author.userId === user.userId
                       ? 'flex-end'
                       : 'flex-start',
-                  backgroundColor:
-                    msg.author.userId === user.userId ? '#4589fd' : 'white',
-                  color: msg.author.userId === user.userId ? 'white' : 'black',
+                  alignItems:
+                    msg.author.userId === user.userId
+                      ? 'flex-end'
+                      : 'flex-start',
                 }}
               >
-                {msg.message}
-              </Box>
+                <Box
+                  sx={{
+                    p: 1,
+                    px: 2,
+                    borderRadius: 2,
+                    width: 'fit-content',
+                    backgroundColor:
+                      msg.author.userId === user.userId ? '#4589fd' : 'white',
+                    color:
+                      msg.author.userId === user.userId ? 'white' : 'black',
+                  }}
+                >
+                  {msg.message}
+                </Box>
+                <Typography sx={{ fontSize: '8px', color: '#777777' }}>
+                  {msg.author.username}
+                </Typography>
+              </Stack>
             ))}
         </Stack>
       </Stack>
