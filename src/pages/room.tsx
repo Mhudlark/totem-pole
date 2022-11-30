@@ -58,7 +58,7 @@ const Index = () => {
         {Array.isArray(room?.users) &&
           room.users.map((roomUsers) => (
             <Box
-              key={roomUsers.username}
+              key={roomUsers.userId}
               sx={{
                 backgroundColor: 'white',
                 p: 1,

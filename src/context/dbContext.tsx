@@ -22,8 +22,9 @@ import type {
 import { deleteUserFromDB } from '@/backend/db/database/user/delete';
 import { insertUserIntoDB } from '@/backend/db/database/user/insert';
 import { updateUserRoomIdInDB } from '@/backend/db/database/user/update';
-import type { ChatMessage, Room, User } from '@/sharedTypes';
+import type { ChatMessage, User } from '@/sharedTypes';
 import { initChatMessageFromAuthorId } from '@/sharedUtils/chatMessage';
+import { initRoom } from '@/sharedUtils/room';
 import { initUser } from '@/sharedUtils/user';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -65,13 +66,13 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
-  const onJoin = (newUsers: User[]) => {
+  const onJoin = useCallback((newUsers: User[]) => {
     dispatch(addUsersToRoom(newUsers));
-  };
+  }, []);
 
-  const onLeave = (deletedUserId: string) => {
+  const onLeave = useCallback((deletedUserId: string) => {
     dispatch(removeUserFromRoom(deletedUserId));
-  };
+  }, []);
 
   const unsubscribeAllChannels = () => {
     supabase.removeAllChannels();
@@ -132,21 +133,8 @@ const DbProvider = ({ children }: DbProviderProps) => {
     const roomUsers = roomInfo.users.map((roomUser) =>
       initUser(roomUser.user_id, roomUser.username)
     );
-    const roomChatMessages = roomInfo.messages.map((roomMessage) =>
-      initChatMessageFromAuthorId(
-        roomMessage.message_id,
-        roomMessage.message,
-        roomMessage.author,
-        roomUsers
-      )
-    );
 
-    const roomJoined: Room = {
-      roomName: roomInfo.room_id,
-      roomId: roomInfo.room_id,
-      users: roomUsers,
-      chatMessages: roomChatMessages,
-    };
+    const roomJoined = initRoom(roomInfo.room_id, roomInfo.room_id, roomUsers);
 
     dispatch(setRoom(roomJoined));
   };
@@ -154,18 +142,13 @@ const DbProvider = ({ children }: DbProviderProps) => {
   const leave = async () => {
     console.log('leave');
 
-    const isRoomEmpty = room.users.length === 1;
-
-    // Delete messages first (foreign key)
-    if (isRoomEmpty) {
-      await deleteMessagesForRoomFromDB(supabase, room.roomId);
-    }
-
-    // Delete user next (foreign key)
     if (user.userId) await deleteUserFromDB(supabase, user.userId);
 
-    // Delete room last
+    const isRoomEmpty = room.users.length === 1;
+
     if (isRoomEmpty) {
+      await deleteMessagesForRoomFromDB(supabase, room.roomId);
+      // Delete room last - foreign key
       await deleteRoomFromDB(supabase, room.roomId);
     }
 
@@ -215,20 +198,12 @@ const DbProvider = ({ children }: DbProviderProps) => {
       console.log('handleMessagesUpdate');
       console.log('newMessageInfo', newMessageInfo);
 
-      const author = room.users.find(
-        (roomUser) => roomUser.userId === newMessageInfo.author
+      const newMessage = initChatMessageFromAuthorId(
+        newMessageInfo.message_id,
+        newMessageInfo.message,
+        newMessageInfo.author,
+        room.users
       );
-
-      if (!author)
-        throw new Error(
-          `Chat message author '${newMessageInfo.author}' not found`
-        );
-
-      const newMessage: ChatMessage = {
-        messageId: newMessageInfo.message_id,
-        message: newMessageInfo.message,
-        author: author as User,
-      };
 
       setChatMessages((prevChatMessages) => [...prevChatMessages, newMessage]);
     },

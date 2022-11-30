@@ -66,5 +66,5 @@ export const useRoomListener = (
         usersChannel.unsubscribe();
       }
     };
-  }, [isInRoom, roomId]);
+  }, [isInRoom, roomId, onUpdate, onDelete]);
 };
