@@ -1,12 +1,6 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import type { ReactNode } from 'react';
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 
 import { useMessagesListener } from '@/backend/db/database/hooks/useMessagesListener';
 import { useRoomListener } from '@/backend/db/database/hooks/useRoomListener';
@@ -139,7 +133,7 @@ const DbProvider = ({ children }: DbProviderProps) => {
     dispatch(setRoom(roomJoined));
   };
 
-  const leave = async () => {
+  const leave = useCallback(async () => {
     console.log('leave');
 
     if (user.userId) await deleteUserFromDB(supabase, user.userId);
@@ -154,7 +148,7 @@ const DbProvider = ({ children }: DbProviderProps) => {
 
     dispatch(resetRoom());
     unsubscribeAllChannels();
-  };
+  }, [user, room]);
 
   const sendChatMessage = async (message: string) => {
     console.log('sendChatMessage');
@@ -210,12 +204,6 @@ const DbProvider = ({ children }: DbProviderProps) => {
     [room]
   );
 
-  useEffect(() => {
-    return () => {
-      leave();
-    };
-  }, []);
-
   useRoomListener(
     supabase,
     room?.roomName !== undefined,
@@ -230,6 +218,13 @@ const DbProvider = ({ children }: DbProviderProps) => {
     room.roomName,
     handleMessagesUpdate
   );
+
+  // THIS CANNOT BE RELIED ON
+  // useEffect(() => {
+  //   return () => {
+  //     leave();
+  //   };
+  // }, []);
 
   return (
     <DbContext.Provider

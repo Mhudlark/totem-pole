@@ -14,7 +14,7 @@ export const useThrottle = (fn: AnyFunction, wait: number = 500) => {
 export const useEventListener = (
   eventName: string,
   handler: (event: Event) => void,
-  element: Element | Window = window
+  element: Element | Window = global.window
 ) => {
   const savedHandler = useRef<AnyFunction>();
 
@@ -45,4 +45,8 @@ export const useEventListener = (
     },
     [eventName, element] // Re-run if eventName or element changes
   );
+};
+
+export const useWindowClose = (handler: (event: BeforeUnloadEvent) => void) => {
+  useEventListener('beforeunload', handler);
 };
